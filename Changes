@@ -1,0 +1,34 @@
+Revision history for WebService-Google-Reader
+
+0.08  Mon Dec 3 20:22:36 UTC 2007
+    - For drag-and-drop: exposed sortid in ListElement; added pref url.
+
+0.07  Sat Dec 1 17:16:33 UTC 2007
+    - Avoided CPANTS error_prereq by using eval with string instead of code.
+
+0.06  Sat Dec 1 16:19:39 UTC 2007
+    - Required 5.6.
+
+0.05  Sat Dec 1 03:09:09 UTC 2007
+    - Used warnings for better kwalitee.
+
+0.04  Wed Oct 31 22:28:42 GMT 2007
+    - Fixed typo in url.
+
+0.03  Tue Oct 16 02:11:53 GMT 2007
+    - Minor Pod correction.
+
+0.02  Wed Oct 10 15:41:07 GMT 2007
+    - No major change- made release stable.
+
+0.01_3  Mon Oct 8 19:46:25 GMT 2007
+    - Finalized API.
+    - Flushed out documentation.
+
+0.01_2  Mon Oct 1 23:04:44 GMT 2007
+    - Added list, edit, search.
+    - Used a cookie_jar instead of directly setting header.
+    - Refactored code.
+
+0.01_1  Sat Sep 17 19:14:57 GMT 2007
+    - Initial distribution.

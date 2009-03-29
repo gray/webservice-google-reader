@@ -1,0 +1,17 @@
+Changes
+ex/get-latest.pl
+ex/reset-account.pl
+ex/search-feeds.pl
+lib/WebService/Google/Reader.pm
+lib/WebService/Google/Reader/Constants.pm
+lib/WebService/Google/Reader/Feed.pm
+lib/WebService/Google/Reader/ListElement.pm
+Makefile.PL
+MANIFEST			This list of files
+NOTES
+README
+t/00_load.t
+t/01_new.t
+t/99_kwalitee.t
+t/99_pod.t
+t/99_pod_coverage.t

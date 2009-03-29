@@ -1,0 +1,31 @@
+WebService-Google-Reader
+========================
+
+This module provides an interface to the Google Reader service.
+
+INSTALLATION
+
+To install this module type the following:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+    Class::Accessor::Fast
+    Crypt::SSLeay or IO::Socket::SSL
+    JSON::Any
+    LWP::UserAgent
+    Test::More
+    XML::Atom
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2007 by gray <gray@cpan.org>
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.

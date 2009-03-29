@@ -1,0 +1,29 @@
+search for feeds in directory:
+https://www.google.com/reader/directory/search?q=%22http%3A%2F%2Fblah%22
+
+quickadd- use this for website -> feed sub
+success:
+<script type="text/javascript">parent._FR_QuickAdd_success('http://example.com/blog/','feed/http://exampley.com/blog/atom.xml');
+failure:
+<script type="text/javascript">parent._FR_QuickAdd_moreResults('\042http://example.com\042');
+</script>
+
+Import subscriptions as OPML:
+
+POST /reader/subscriptions/import HTTP/1.1
+Content-Type: multipart/form-data; boundary=---------------------------12345
+Content-Length: $len
+-----------------------------12345
+Content-Disposition: form-data; name="T"
+
+$token
+-----------------------------12345
+Content-Disposition: form-data; name="action"
+
+opml-upload
+-----------------------------12345
+
+Content-Disposition: form-data; name="opml-file"; filename="$filename"
+Content-Type: text/xml
+
+$opml
