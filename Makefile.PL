@@ -22,11 +22,13 @@ WriteMakefile(
         'XML::Atom'             => 0,
         @prereq
     },
-    (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
-        resources => {
-            Repository => 'http://github.com/gray/webservice-google-reader'
+    (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
+        META_MERGE => {
+            resources => {
+                repository => 'http://github.com/gray/webservice-google-reader',
+            }
         }
-    }) : () ),
+    ) : () ),
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'WebService-Google-Reader-*' },
 );
