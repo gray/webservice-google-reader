@@ -52,6 +52,8 @@ This is a reference to more ListElements.
 
 =item shared
 
+=item sortid
+
 =item title
 
 =item value
