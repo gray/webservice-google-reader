@@ -596,7 +596,7 @@ sub _encode_feed {
     for my $f ('ARRAY' eq ref $feed ? @$feed : ($feed)) {
         my $path = $f;
         if ('feed/' ne substr $f, 0, 5) {
-            $path = 'feed/' . $escape ? uri_escape($f) : $f;
+            $path = 'feed/' . ($escape ? uri_escape($f) : $f);
         }
         push @paths, $path;
     }
