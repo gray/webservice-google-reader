@@ -1,7 +1,9 @@
 Revision history for WebService-Google-Reader
 
-0.08  Mon Dec 3 20:22:36 UTC 2007
-    - For drag-and-drop: exposed sortid in ListElement; added pref url.
+0.08  Sat May  2 21:02:00 UTC 2009
+    - Prevent uninitialized warning.
+    - Skipped login for public feed.
+    - Exposed sortid field in ListElement,
 
 0.07  Sat Dec 1 17:16:33 UTC 2007
     - Avoided CPANTS error_prereq by using eval with string instead of code.
