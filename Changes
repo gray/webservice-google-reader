@@ -1,7 +1,7 @@
 Revision history for WebService-Google-Reader
 
 0.08  Sat May  2 21:02:00 UTC 2009
-    - Prevent uninitialized warning.
+    - Prevented uninitialized warning.
     - Skipped login for public feed.
     - Exposed sortid field in ListElement,
 
