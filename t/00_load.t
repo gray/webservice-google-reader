@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use Test::More tests => 4;
 
 BEGIN { use_ok('WebService::Google::Reader'); }
