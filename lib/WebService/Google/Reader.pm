@@ -7,7 +7,7 @@ use base qw(Class::Accessor::Fast);
 use HTTP::Cookies;
 use HTTP::Request::Common qw(GET POST);
 use LWP::UserAgent;
-use JSON::Any;
+use JSON;
 use URI::Escape;
 use URI::QueryParam;
 
@@ -92,7 +92,7 @@ sub search {
     my $res = $self->_request($req) or return;
 
     my @ids = do {
-        my $ref = eval { JSON::Any->decode($res->decoded_content) };
+        my $ref = eval { decode_json($res->decoded_content) };
         if ($@) {
             $self->error("Failed to parse JSON response: $@");
             return;
@@ -691,7 +691,7 @@ sub _list {
 
     my $res = $self->_request(GET($uri)) or return;
 
-    my $ref = eval { JSON::Any->decode($res->decoded_content) };
+    my $ref = eval { decode_json($res->decoded_content) };
     if ($@) {
        $self->error("Failed to parse JSON response: $@");
         return;
