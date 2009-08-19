@@ -11,14 +11,14 @@ my $reader = WebService::Google::Reader->new(
     password => $ENV{GOOGLE_PASSWORD},
 );
 
-my $feed = $reader->search( $query, feed => \@feeds, count => 50 )
+my $feed = $reader->search($query, feed => \@feeds, count => 50)
     or die $reader->error;
 
 do {
-    for my $entry ( $feed->entries ) {
+    for my $entry ($feed->entries) {
         print $entry->title, "\n";
         print $entry->link->href, "\n" if $entry->link and $entry->link->href;
     }
 
     sleep 1;
-} while ( $reader->more( $feed ) );
+} while ($reader->more($feed));

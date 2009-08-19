@@ -10,17 +10,17 @@ my $reader = WebService::Google::Reader->new(
     password => $ENV{GOOGLE_PASSWORD},
 );
 
-my $feed = $reader->unread( count => 50 ) or die $reader->error;
+my $feed = $reader->unread(count => 50) or die $reader->error;
 
 do {
-    for my $entry ( $feed->entries ) {
+    for my $entry ($feed->entries) {
         print $entry->title, "\n";
         print $entry->link->href, "\n" if $entry->link and $entry->link->href;
     }
 
-    # $reader->mark_read_entry( $feed->entries ) or die $reader->error;
+    # $reader->mark_read_entry($feed->entries) or die $reader->error;
 
     exit unless $continue;
 
     sleep 1;
-} while $reader->more( $feed );
+} while $reader->more($feed);
