@@ -17,11 +17,6 @@ use WebService::Google::Reader::ListElement;
 
 our $VERSION = '0.08';
 
-if (DEBUG) {
-    require Carp;
-    @SIG{qw(__DIE__ __WARN__)} = \(&Carp::confess, &Carp::cluck);
-}
-
 __PACKAGE__->mk_accessors(qw(
     error password scheme token ua username
 ));
