@@ -1,0 +1,17 @@
+verbose = 8
+
+[CodeLayout::ProhibitHardTabs]
+allow_leading_tabs = 0
+severity = 5
+
+[CodeLayout::ProhibitTrailingWhitespace]
+severity = 5
+
+[CodeLayout::RequireASCII]
+severity = 5
+
+[TestingAndDebugging::ProhibitNoStrict]
+allow = refs
+
+[BuiltinFunctions::ProhibitStringyEval]
+allow_includes = 1
