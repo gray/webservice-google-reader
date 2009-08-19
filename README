@@ -18,14 +18,17 @@ This module requires these other modules and libraries:
 
     Class::Accessor::Fast
     Crypt::SSLeay or IO::Socket::SSL
-    JSON::Any
+    JSON
     LWP::UserAgent
     Test::More
+    URI
+    URI::Escape
+    URI::QueryParm
     XML::Atom
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2007 by gray <gray@cpan.org>
+Copyright (C) 2007-2009 by gray <gray@cpan.org>
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

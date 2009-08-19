@@ -19,6 +19,7 @@ my %conf = (
         'JSON'                  => 0,
         'LWP::UserAgent'        => 0,
         'Test::More'            => 0,
+        'URI'                   => 0,
         'URI::Escape'           => 0,
         'URI::QueryParam'       => 0,
         'XML::Atom'             => 0,
