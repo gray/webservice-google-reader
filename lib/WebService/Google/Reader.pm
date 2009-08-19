@@ -16,7 +16,8 @@ use WebService::Google::Reader::Constants;
 use WebService::Google::Reader::Feed;
 use WebService::Google::Reader::ListElement;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
+$VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
     error password scheme token ua username
