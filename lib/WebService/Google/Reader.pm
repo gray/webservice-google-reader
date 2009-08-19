@@ -1233,7 +1233,8 @@ Entries which have been kept unread.
 
 =head1 NOTES
 
-If C<Compress::Zlib> is found, then requests will accept compressed responses.
+If C<Compress::Zlib> is found, then requests will accept compressed
+responses.
 
 =head1 SEE ALSO
 
@@ -1244,7 +1245,7 @@ L<http://code.google.com/p/pyrfeed/wiki/GoogleReaderAPI>
 =head1 REQUESTS AND BUGS
 
 Please report any bugs or feature requests to
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WebService-Google-Reader>.
+L<http://rt.cpan.org/Public/Bug/Report.html?Queue=WebService-Google-Reader>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
 
@@ -1258,6 +1259,10 @@ You can also look for information at:
 
 =over
 
+=item * GitHub Source Repository
+
+L<http://github.com/gray/webservice-google-reader>
+
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/WebService-Google-Reader>
@@ -1268,7 +1273,7 @@ L<http://cpanratings.perl.org/d/WebService-Google-Reader>
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WebService-Google-Reader>
+L<http://rt.cpan.org/Public/Dist/Display.html?Dist=WebService-Google-Reader>
 
 =item * Search CPAN
 
