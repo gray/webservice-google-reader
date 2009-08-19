@@ -93,7 +93,9 @@ sub search {
     my $res = $self->_request($req) or return;
 
     my @ids = do {
-        my $ref = eval { decode_json($res->decoded_content) };
+        my $ref = eval {
+            decode_json($res->decoded_content(charset => 'none'))
+        };
         if ($@) {
             $self->error("Failed to parse JSON response: $@");
             return;
@@ -692,7 +694,9 @@ sub _list {
 
     my $res = $self->_request(GET($uri)) or return;
 
-    my $ref = eval { decode_json($res->decoded_content) };
+    my $ref = eval {
+        decode_json($res->decoded_content(charset=>'none'))
+    };
     if ($@) {
        $self->error("Failed to parse JSON response: $@");
         return;
