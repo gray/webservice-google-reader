@@ -10,8 +10,8 @@ severity = 5
 [CodeLayout::RequireASCII]
 severity = 5
 
-[TestingAndDebugging::ProhibitNoStrict]
-allow = refs
+[TestingAndDebugging::RequireUseWarnings]
+severity = 5
 
-[BuiltinFunctions::ProhibitStringyEval]
-allow_includes = 1
+[-TestingAndDebugging::ProhibitNoStrict]
+[-BuiltinFunctions::ProhibitStringyEval]
