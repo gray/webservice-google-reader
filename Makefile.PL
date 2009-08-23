@@ -4,7 +4,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my @prereq;
-unless ( eval { require IO::Socket::SSL; 1 } ) {
+unless (eval { require IO::Socket::SSL; 1 }) {
     push @prereq, 'Crypt::SSLeay' => 0;
 }
 
@@ -16,6 +16,9 @@ my %conf = (
     ABSTRACT_FROM => 'lib/WebService/Google/Reader.pm',
     PREREQ_PM     => {
         'Class::Accessor::Fast' => 0,
+        'Encode'                => 0,
+        'HTTP::Cookies'         => 0,
+        'HTTP::Request::Common' => 0,
         'JSON'                  => 0,
         'LWP::UserAgent'        => 0,
         'Test::More'            => 0,
@@ -30,7 +33,8 @@ my %conf = (
             repository => 'http://github.com/gray/webservice-google-reader',
         },
         recommends => {
-            'JSON::XS' => 2.0,
+            'Compress::Zlib' => 0,
+            'JSON::XS'       => 2.0,
         },
     },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
