@@ -28,8 +28,8 @@ my %conf = (
         'XML::Atom'             => 0,
         @prereq
     },
-    META_MERGE    => {
-        resources  => {
+    META_MERGE     => {
+        resources => {
             repository => 'http://github.com/gray/webservice-google-reader',
         },
         recommends => {
@@ -46,3 +46,18 @@ unless (eval { ExtUtils::MakeMaker->VERSION(6.46) }) {
 }
 
 WriteMakefile(%conf);
+
+
+sub MY::postamble {
+    return <<"    MAKE_FRAG";
+authortest:
+\t\$(MAKE) -e \$(TEST_TYPE) TEST_FILES="xt/*.t"
+    MAKE_FRAG
+}
+
+sub MY::dist_test {
+    my $self = shift;
+    return $self->MM::dist_test . <<"    MAKE_FRAG";
+\tcd \$(DISTVNAME) && \$(MAKE) authortest \$(PASTHRU)
+    MAKE_FRAG
+}
