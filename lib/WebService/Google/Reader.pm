@@ -514,17 +514,7 @@ sub _request {
 
     print $req->as_string, "-"x80, "\n" if DEBUG;
 
-    if (HAS_ZLIB) {
-        $req->header(accept_encoding => 'gzip,deflate');
-        # Doesn't always work; gets 415- unsupported media type for some urls.
-        #if (my $content = $req->content) {
-        #    if ($content = Compress::Zlib::memGzip($content)) {
-        #        $req->content($content);
-        #        $req->content_length(length $content);
-        #        $req->content_encoding('gzip');
-        #    }
-        #}
-    }
+    $req->header(accept_encoding => 'gzip,deflate') if HAS_ZLIB;
 
     my $res = $self->ua->request($req);
     if ($res->is_error) {
