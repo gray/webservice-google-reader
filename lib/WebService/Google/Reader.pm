@@ -468,7 +468,6 @@ sub _login {
         Email    => $self->username,
         Passwd   => $self->password,
         source   => $self->ua->agent,
-        continue => READER_URL,
     );
     my $res = $self->ua->post($uri);
     my $content = $res->decoded_content;
