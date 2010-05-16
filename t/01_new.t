@@ -28,9 +28,8 @@ use WebService::Google::Reader;
 
         edit_preference opml ping mark_read
 
-        _login _request _token _public _cookie _states _encode_type
-        _encode_feed _encode_tag _encode_state _encode_entry _feed _list
-        _edit _edit_tag
+        _login _request _public _states _encode_type _encode_feed
+        _encode_tag _encode_state _encode_entry _feed _list _edit _edit_tag
     );
     can_ok('WebService::Google::Reader', @methods);
 }

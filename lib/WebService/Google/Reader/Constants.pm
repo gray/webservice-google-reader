@@ -22,7 +22,6 @@ use constant HAS_ZLIB => $has_zlib;
 
 use constant LOGIN_URL => 'https://www.google.com/accounts/ClientLogin';
 use constant READER_URL => 'http://www.google.com/reader';
-use constant TOKEN_URL => READER_URL.'/api/0/token';
 
 use constant ATOM_URL => READER_URL.'/atom/';
 use constant ATOM_PUBLIC_URL => READER_URL.'/public/atom/';
