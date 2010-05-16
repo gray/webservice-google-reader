@@ -7,11 +7,17 @@ severity = 5
 [CodeLayout::ProhibitTrailingWhitespace]
 severity = 5
 
+# requires Perl::Critic::More
 [CodeLayout::RequireASCII]
 severity = 5
 
 [TestingAndDebugging::RequireUseWarnings]
 severity = 5
 
+# requires Regexp::Parser
+[RegularExpressions::ProhibitUnusedCapture]
+severity = 5
+
 [-TestingAndDebugging::ProhibitNoStrict]
 [-BuiltinFunctions::ProhibitStringyEval]
+[-ValuesAndExpressions::ProhibitLeadingZeros]
