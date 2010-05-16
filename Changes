@@ -1,5 +1,9 @@
 Revision history for WebService-Google-Reader
 
+0.10  Sun May 16 07:16:58 UTC 2010
+    - Migrated from deprecated SID cookie-based authentication to ClientLogin
+    - Updated prereqs.
+
 0.09  Wed Aug 19 14:20:16 UTC 2009
     - Fixed decoding bug (RT #48787)
     - Moved author tests into separate directory.
