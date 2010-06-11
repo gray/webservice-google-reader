@@ -658,7 +658,7 @@ sub _list {
         decode_json($res->decoded_content(charset=>'none'))
     };
     if ($@) {
-       $self->error("Failed to parse JSON response: $@");
+        $self->error("Failed to parse JSON response: $@");
         return;
     }
 
