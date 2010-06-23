@@ -26,6 +26,7 @@ my %conf = (
         'URI::Escape'           => 0,
         'URI::QueryParam'       => 0,
         'XML::Atom'             => 0,
+        'XML::LibXML'           => 0,
         @prereq
     },
     META_MERGE     => {
