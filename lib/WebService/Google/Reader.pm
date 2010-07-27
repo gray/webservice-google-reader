@@ -15,11 +15,11 @@ use WebService::Google::Reader::Constants;
 use WebService::Google::Reader::Feed;
 use WebService::Google::Reader::ListElement;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 $VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
-    error password scheme token ua username
+    auth compress error password scheme token ua username
 ));
 
 sub new {
@@ -30,16 +30,41 @@ sub new {
     my $ua = $params{ua};
     unless (ref $ua and $ua->isa(q(LWP::UserAgent))) {
         $ua = LWP::UserAgent->new(
-            # Google only compresses content for certain agents or if gzip
-            # is part of the agent name.
-            agent => __PACKAGE__.'/'.$VERSION . (HAS_ZLIB ? ' (gzip)' :'')
+            agent => __PACKAGE__.'/'.$VERSION,
         );
         $self->ua($ua);
     }
 
+    $self->compress(1);
+    $self->debug(0);
+    for my $accessor (qw( compress debug )) {
+        $self->$accessor($params{$accessor}) if exists $params{$accessor};
+    }
+
+    $ua->default_header(accept_encoding => 'gzip,deflate')
+        if $self->compress;
+
     $self->scheme($params{secure} || $params{https} ? 'https' : 'http');
 
     return $self;
+}
+
+sub debug {
+    my $self = shift;
+    return $self->{debug} unless @_;
+
+    my $ua = $self->ua;
+    if ($self->{debug} = (shift) ? 1 : 0) {
+        my $dump_sub = sub { $_[0]->dump(maxlength => 0); return };
+        $ua->set_my_handler(request_send  => $dump_sub);
+        $ua->set_my_handler(response_done => $dump_sub);
+    }
+    else {
+        $ua->set_my_handler(request_send  => undef);
+        $ua->set_my_handler(response_done => undef);
+    }
+
+    return $self->{debug};
 }
 
 ## Feeds
@@ -65,18 +90,20 @@ sub starred {
 }
 
 sub unread {
-    return shift->state('reading-list', exclude => { state => 'read' }, @_);
+    return shift->state(
+        'reading-list', exclude => { state => 'read' }, @_
+    );
 }
 
 sub search {
     my ($self, $query, %params) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
     my $uri = URI->new(SEARCH_IDS_URL);
 
-    my %fields;
-    $fields{num} = $params{results} || 1000;
+    my %fields = (num => $params{results} || 1000);
 
     my @types = grep { exists $params{$_} } qw(feed state tag);
     for my $type (@types) {
@@ -117,7 +144,7 @@ sub more {
         my @ids = splice @{$feed->ids}, 0, $feed->count;
         return unless @ids;
 
-        my $uri = URI->new(STREAM_IDS_CONTENT_URL, 'https');
+        my $uri = URI->new(STREAM_IDS_CONTENT_URL);
         $req = POST($uri, [ map { ('i', $_) } @ids ]);
     }
     elsif ($feed->elem) {
@@ -136,7 +163,7 @@ sub more {
     return $feed;
 }
 
-*previous = *next = \&more;
+*previous = *previous = *next = *next = \&more;
 
 ## Lists
 
@@ -229,8 +256,9 @@ sub rename_entry_tag {
     for my $o ('ARRAY' eq ref $old ? @$old : ($old)) {
         my $feed = $self->tag($o) or return;
         do {
-            $self->edit_entry([ $feed->entries ], tag => $new, untag => $old)
-                or return;
+            $self->edit_entry(
+                [ $feed->entries ], tag => $new, untag => $old
+            ) or return;
         } while ($self->feed($feed));
     }
 
@@ -250,6 +278,7 @@ sub edit_feed {
     my ($self, $sub, %params) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
     my $url = EDIT_SUB_URL;
 
@@ -257,7 +286,7 @@ sub edit_feed {
     for my $s ('ARRAY' eq ref $sub ? @$sub : ($sub)) {
         if (__PACKAGE__.'::Feed' eq ref $s) {
             my $id = $s->id or next;
-            $id =~ s[^tag:google.com,2005:reader/][];
+            $id =~ s[^(user|webfeed|tag:google\.com,2005:reader/)][];
             $id =~ s[\?.*][];
             push @{$fields{s}}, $id;
         }
@@ -339,6 +368,7 @@ sub edit_entry {
     my ($self, $entry, %params) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
     my %fields = (ac => 'edit');
     for my $e ('ARRAY' eq ref $entry ? @$entry : ($entry)) {
@@ -397,13 +427,13 @@ sub star_entry {
     return shift->edit_entry(shift, state => 'starred');
 }
 
-*star = \&star_entry;
+*star = *star = \&star_entry;
 
 sub unstar_entry {
     return shift->edit_entry(shift, unstate => 'starred');
 }
 
-*unstar = \&unstar_entry;
+*unstar = *unstar = \&unstar_entry;
 
 sub mark_read_entry {
     return shift->edit_entry(\@_, state => 'read');
@@ -415,6 +445,7 @@ sub mark_read {
     my ($self, %params) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
     my %fields;
     my @types = grep { exists $params{$_} } qw(feed state tag);
@@ -429,6 +460,7 @@ sub edit_preference {
     my ($self, $key, $val) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
     return $self->_edit(EDIT_PREF_URL, k => $key, v => $val);
 }
@@ -454,20 +486,20 @@ sub ping {
     return;
 }
 
-
 ## Private interface
 
 sub _login {
     my ($self, $force) = @_;
 
     return 1 if $self->_public;
+    return 1 if $self->auth and not $force;
 
     my $uri = URI->new(LOGIN_URL);
     $uri->query_form(
-        service  => 'reader',
-        Email    => $self->username,
-        Passwd   => $self->password,
-        source   => $self->ua->agent,
+        service => 'reader',
+        Email   => $self->username,
+        Passwd  => $self->password,
+        source  => $self->ua->agent,
     );
     my $res = $self->ua->post($uri);
     my $content = $res->decoded_content;
@@ -478,12 +510,12 @@ sub _login {
         return;
     }
 
-    my ($token) = $content =~ m[ ^Auth=(.*)$ ]mx;
-    unless ($token) {
-        $self->error('could not find Auth token');
+    my ($auth) = $content =~ m[ ^Auth=(.*)$ ]mx;
+    unless ($auth) {
+        $self->error('could not find ClientLogin token');
         return;
     }
-    $self->token($token);
+    $self->auth($auth);
 
     return 1;
 }
@@ -494,30 +526,57 @@ sub _request {
     return if $count and 2 <= $count;
 
     # Assume all POST requests are secure.
-    $req->uri->scheme($self->scheme) if 'GET' eq $req->method;
+    if ('POST' eq $req->method) {
+        $req->uri->scheme('https');
+    }
+    elsif ('GET' eq $req->method and 'https' ne $req->uri->scheme) {
+        $req->uri->scheme($self->scheme);
+    }
+
     $req->uri->query_param(ck => time * 1000);
     $req->uri->query_param(client => $self->ua->agent);
 
-    print $req->as_string, "-"x80, "\n" if DEBUG;
-
-    $req->header(authorization => 'GoogleLogin auth=' . $self->token)
-        if $self->token;
-    $req->header(accept_encoding => 'gzip,deflate') if HAS_ZLIB;
+    $req->header(authorization => 'GoogleLogin auth=' . $self->auth)
+        if $self->auth;
 
     my $res = $self->ua->request($req);
     if ($res->is_error) {
-        # Need a fresh token.
+        # Need fresh tokens.
         if (401 == $res->code and $res->message =~ /^Token /) {
-            print "Stale token- retrying\n" if DEBUG;
+            print "Stale ClientLogin token- retrying\n" if $self->{debug};
             $self->_login(1) or return;
+            $self->_token(1) or return if $self->token;
+            return $self->_request($req,  $count++);
+        }
+        elsif ($res->header('X-Reader-Google-Bad-Token')) {
+            print "Stale T token- retrying\n" if $self->{debug};
+            $self->_token(1);
             return $self->_request($req,  $count++);
         }
 
         $self->error($res->status_line . ' - ' . $res->decoded_content);
         return;
     }
+    else {
+        # Reset the error from previous requests.
+        $self->error(undef);
+    }
 
     return $res;
+}
+
+sub _token {
+    my ($self, $force) = @_;
+
+    return 1 if $self->token and not $force;
+
+    $self->_login or return;
+
+    my $uri = URI->new(TOKEN_URL);
+    $uri->scheme('https');
+    my $res = $self->_request(GET($uri)) or return;
+
+    return $self->token($res->decoded_content);
 }
 
 sub _public {
@@ -526,8 +585,8 @@ sub _public {
 
 sub _encode_type {
     my ($type, $val, $escape) = @_;
-    my @paths;
 
+    my @paths;
     if ('feed' eq $type) {
         @paths = _encode_feed($val, $escape);
     }
@@ -623,9 +682,9 @@ sub _feed {
         $fields{ot} = $start_time;
     }
     if (my $order = $params{order} || $params{sort}) {
-            # m = magic/auto; not really sure what that is
-            $fields{r} = 'desc' eq $order ? 'n' :
-                         'asc' eq $order ? 'o' : $order;
+        # m = magic/auto; not really sure what that is
+        $fields{r} = 'desc' eq $order ? 'n' :
+                     'asc'  eq $order ? 'o' : $order;
     }
     if (defined(my $continuation = $params{continuation})) {
         $fields{c} = $continuation;
@@ -674,7 +733,7 @@ sub _list {
 
 sub _edit {
     my ($self, $url, %fields) = @_;
-    my $uri = URI->new($url, 'https');
+    my $uri = URI->new($url);
     my $req = POST($uri, [ %fields, T => $self->token ]);
     my $res = $self->_request($req) or return;
 
@@ -689,10 +748,10 @@ sub _edit_tag {
     my ($self, $type, $tag, %params) = @_;
 
     $self->_login or return;
+    $self->_token or return;
 
-    my %fields;
-    push @{$fields{s}}, _encode_type($type => $tag);
-    return 1 unless @{$fields{s} || []};
+    my %fields = (s => [ _encode_type($type => $tag) ]);
+    return 1 unless @{$fields{s}};
 
     my $url;
     if (grep { exists $params{$_} } qw(share public)) {
@@ -760,8 +819,8 @@ Google Reader service through the unofficial (as-yet unpublished) API.
 
 =item $reader = WebService::Google::Reader->B<new>
 
-Creates a new WebService::Google::Reader object. The following named parameters
-are accepted:
+Creates a new WebService::Google::Reader object. The following named
+parameters are accepted:
 
 =over
 
@@ -777,6 +836,16 @@ Use https scheme for all requests, even when not required.
 =item B<ua>
 
 An optional useragent object.
+
+=item B<debug>
+
+Enable debugging. Default: 0. This will dump the headers and content for
+both requests and responses.
+
+=item B<compress>
+
+Disable compression. Default: 1. This is useful when debugging is enabled
+and you want to read the response content.
 
 =back
 
@@ -804,12 +873,13 @@ default order has no limitation.
 
 =item B<start_time>
 
-Request entries only newer than this time (represented as a unix timestamp).
+Request entries only newer than this time (represented as a unix
+timestamp).
 
 =item B<exclude>(feed => $feed|[@feeds], tag => $tag|[@tags])
 
-Accepts a hash reference to one or more of feed / tag / state. Each of which
-is a scalar or array reference.
+Accepts a hash reference to one or more of feed / tag / state. Each of
+which is a scalar or array reference.
 
 =back
 
@@ -853,8 +923,8 @@ Accepts a query string and the following named parameters:
 
 =item B<feed> / B<state> / B<tag>
 
-One or more (as a array reference) feed / state / tag to search. The default
-is to search all feed subscriptions.
+One or more (as a array reference) feed / state / tag to search. The
+default is to search all feed subscriptions.
 
 =item B<results>
 
@@ -872,8 +942,8 @@ The sort order of the entries: B<desc> (default) or B<asc> in time.
 
 =item B<more> / B<previous> / B<next>
 
-A feed generator only returns B<$count> entries. If more are available, calling
-this method will return a feed with the next B<$count> entries.
+A feed generator only returns B<$count> entries. If more are available,
+calling this method will return a feed with the next B<$count> entries.
 
 =back
 
@@ -886,15 +956,15 @@ C<WebService::Google::Reader::ListElement>.
 
 =item B<counts>
 
-Returns a list of subscriptions and a count of unread entries. Also listed are
-any tags or states which have positive unread counts. The following accessors
-are provided: id, count. The maximum count reported is 1000.
+Returns a list of subscriptions and a count of unread entries. Also listed
+are any tags or states which have positive unread counts. The following
+accessors are provided: id, count. The maximum count reported is 1000.
 
 =item B<feeds>
 
-Returns the list of user subscriptions. The following accessors are provided:
-id, title, categories, firstitemmsec. categories is a reference to a list of
-C<ListElement>s providing accessors: id, label.
+Returns the list of user subscriptions. The following accessors are
+provided: id, title, categories, firstitemmsec. categories is a reference
+to a list of C<ListElement>s providing accessors: id, label.
 
 =item B<preferences>
 
@@ -903,8 +973,8 @@ provided: id, value.
 
 =item B<tags>
 
-Returns the list of user-created tags. The following accessors are provided:
-id, shared.
+Returns the list of user-created tags. The following accessors are
+provided: id, shared.
 
 =item B<userinfo>
 
@@ -928,19 +998,19 @@ The following named parameters are accepted:
 
 =item B<subscribe> / B<unsubscribe>
 
-Flag indicating whether the target feeds should be added or removed from the
-user's subscriptions.
+Flag indicating whether the target feeds should be added or removed from
+the user's subscriptions.
 
 =item B<title>
 
-Accepts a title to associate with the feed. This probaby wouldn't make sense
-to use when there are multiple feeds. (Maybe later will consider allowing a
-list here and zipping the feed and title lists).
+Accepts a title to associate with the feed. This probaby wouldn't make
+sense to use when there are multiple feeds. (Maybe later will consider
+allowing a list here and zipping the feed and title lists).
 
 =item B<tag> / B<state> / B<untag> / B<unstate>
 
-Accepts a tag / state or a reference to a list of tags / states for which to
-associate / unassociate the target feeds.
+Accepts a tag / state or a reference to a list of tags / states for which
+to associate / unassociate the target feeds.
 
 =back
 
@@ -1022,7 +1092,8 @@ Renames the tags associated with any individual entries.
 
 =item B<rename_tag>($oldtag|[@oldtags], $newtag|[@newtags]
 
-Calls B<rename_feed_tag> and B<rename_entry_tag>, and finally B<delete_tag>.
+Calls B<rename_feed_tag> and B<rename_entry_tag>, and finally
+B<delete_tag>.
 
 =item B<mark_read_tag>(@tags)
 
@@ -1112,17 +1183,22 @@ The following private methods may be of use to others.
 
 =item B<_login>
 
-This is automatically called from within methods that require authorization.
-An optional parameter is accepted which when true, will force a login even
-if a previous login was successful. The end result of a successful login is
-to set the SID cookie.
+This is automatically called from within methods that require
+authorization.  An optional parameter is accepted which when true, will
+force a login even if a previous login was successful. The end result of
+a successful login is to set the auth token.
 
 =item B<_request>
 
-Given an C<HTTP::Request>, this will perform the request and if the response
-indicates a bad (expired) token, it will request another token before
-performing the request again. Returns an C<HTTP::Response> on success, false
-on failure (check B<error>).
+Given an C<HTTP::Request>, this will perform the request and if the
+response indicates a bad (expired) token, it will request another token
+before performing the request again. Returns an C<HTTP::Response> on
+success, false on failure (check B<error>).
+
+=item B<_token>
+
+This is automatically called from within methods that require a user token.
+If successful, the token is available via the B<token> accessor.
 
 =item B<_states>
 
@@ -1136,8 +1212,8 @@ The following characters are not allowed: "E<lt>E<gt>?&/\^
 
 =head1 STATES
 
-These are tags in a Google-specific namespace. The following are all the known
-used states.
+These are tags in a Google-specific namespace. The following are all the
+known used states.
 
 =over
 
@@ -1184,11 +1260,6 @@ Entries which have been kept unread.
 
 =back
 
-=head1 NOTES
-
-If C<Compress::Zlib> is found, then requests will accept compressed
-responses.
-
 =head1 SEE ALSO
 
 L<XML::Atom::Feed>
@@ -1199,8 +1270,8 @@ L<http://code.google.com/p/pyrfeed/wiki/GoogleReaderAPI>
 
 Please report any bugs or feature requests to
 L<http://rt.cpan.org/Public/Bug/Report.html?Queue=WebService-Google-Reader>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
+I will be notified, and then you'll automatically be notified of progress
+on your bug as I make changes.
 
 =head1 SUPPORT
 

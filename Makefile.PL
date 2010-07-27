@@ -1,4 +1,3 @@
-use 5.006;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
@@ -21,7 +20,6 @@ my %conf = (
         'HTTP::Request::Common' => 0,
         'JSON'                  => 0,
         'LWP::UserAgent'        => 0,
-        'Test::More'            => 0,
         'URI'                   => 0,
         'URI::Escape'           => 0,
         'URI::QueryParam'       => 0,
@@ -29,22 +27,26 @@ my %conf = (
         'XML::LibXML'           => 0,
         @prereq
     },
+    BUILD_REQUIRES => {
+        'Test::More' => 0.82,
+    },
     META_MERGE     => {
-        resources => {
+        resources  => {
             repository => 'http://github.com/gray/webservice-google-reader',
         },
         recommends => {
-            'Compress::Zlib' => 0,
-            'JSON::XS'       => 2.0,
+            'JSON::XS' => 2.0,
         },
     },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'WebService-Google-Reader-*' },
 );
 
-unless (eval { ExtUtils::MakeMaker->VERSION(6.46) }) {
-    delete $conf{META_MERGE};
-}
+my $eumm_version=$ExtUtils::MakeMaker::VERSION;
+delete $conf{META_MERGE} if $eumm_version < 6.46;
+$conf{PREREQ_PM} = {
+    %{ $conf{PREREQ_PM} || {} }, %{ delete $conf{BUILD_REQUIRES} },
+} if ($conf{BUILD_REQUIRES} and $eumm_version < 6.5503);
 
 WriteMakefile(%conf);
 

@@ -15,10 +15,11 @@ my $feed = $reader->unread(count => 50) or die $reader->error;
 do {
     for my $entry ($feed->entries) {
         print $entry->title, "\n";
-        print $entry->link->href, "\n" if $entry->link and $entry->link->href;
+        print $entry->link->href, "\n"
+            if $entry->link and $entry->link->href;
     }
 
-    # $reader->mark_read_entry($feed->entries) or die $reader->error;
+    $reader->mark_read_entry($feed->entries) or die $reader->error;
 
     exit unless $continue;
 

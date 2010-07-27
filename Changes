@@ -1,11 +1,16 @@
 Revision history for WebService-Google-Reader
 
+0.11  Tue Jul 27 15:19:52 UTC 2010
+    - Added back token logic since it is required for POSTs.
+      (reported by Brian Hannah)
+    - Added XML::LibXML as a prereq. (RT #58601)
+
 0.10  Sun May 16 07:16:58 UTC 2010
     - Migrated from deprecated SID cookie-based authentication to ClientLogin
     - Updated prereqs.
 
 0.09  Wed Aug 19 14:20:16 UTC 2009
-    - Fixed decoding bug (RT #48787)
+    - Fixed decoding bug. (RT #48787)
     - Moved author tests into separate directory.
     - Updated prereqs.
 

@@ -6,22 +6,12 @@ use base qw(Exporter);
 
 our @EXPORT = do {
     no strict 'refs';
-    (
-        qw(DEBUG HAS_ZLIB NS_GOOGLE_READER),
-        grep(/_URL$/, keys %{__PACKAGE__.'::'}),
-    );
+    ( qw(NS_GOOGLE_READER), grep(/_URL$/, keys %{__PACKAGE__.'::'}), )
 };
-
-use constant DEBUG => $ENV{WEBSERVICE_GOOGLE_READER_DEBUG} || 0;
-
-my $has_zlib;
-BEGIN {
-    $has_zlib = eval 'require Compress::Zlib; 1' ? 1 : 0;
-}
-use constant HAS_ZLIB => $has_zlib;
 
 use constant LOGIN_URL => 'https://www.google.com/accounts/ClientLogin';
 use constant READER_URL => 'http://www.google.com/reader';
+use constant TOKEN_URL => READER_URL.'/api/0/token';
 
 use constant ATOM_URL => READER_URL.'/atom/';
 use constant ATOM_PUBLIC_URL => READER_URL.'/public/atom/';

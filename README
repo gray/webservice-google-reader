@@ -25,6 +25,7 @@ This module requires these other modules and libraries:
     URI::Escape
     URI::QueryParm
     XML::Atom
+    XML::LibXML
 
 COPYRIGHT AND LICENCE
 
