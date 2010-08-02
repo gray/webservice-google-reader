@@ -546,12 +546,12 @@ sub _request {
             print "Stale ClientLogin token- retrying\n" if $self->{debug};
             $self->_login(1) or return;
             $self->_token(1) or return if $self->token;
-            return $self->_request($req,  $count++);
+            return $self->_request($req, ++$count);
         }
         elsif ($res->header('X-Reader-Google-Bad-Token')) {
             print "Stale T token- retrying\n" if $self->{debug};
             $self->_token(1);
-            return $self->_request($req,  $count++);
+            return $self->_request($req, ++$count);
         }
 
         $self->error($res->status_line . ' - ' . $res->decoded_content);
