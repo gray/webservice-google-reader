@@ -1,5 +1,8 @@
 Revision history for WebService-Google-Reader
 
+0.12  Mon Aug  2 10:34:42 UTC 2010
+    - Fixed infinite recursion in failed requests. (RT #59999)
+
 0.11  Tue Jul 27 15:19:52 UTC 2010
     - Added back token logic since it is required for POSTs.
       (reported by Brian Hannah)
