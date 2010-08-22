@@ -2,7 +2,7 @@ package WebService::Google::Reader::Constants;
 
 use strict;
 use warnings;
-use base qw(Exporter);
+use parent qw(Exporter);
 
 our @EXPORT = do {
     no strict 'refs';
@@ -38,7 +38,8 @@ use constant STREAM_IDS_URL => API_URL.'/api/0/stream/items/ids';
 use constant SEARCH_IDS_URL => API_URL.'/search/items/ids';
 use constant STREAM_IDS_CONTENT_URL => API_URL.'/stream/items/contents';
 
-use constant NS_GOOGLE_READER => 'http://www.google.com/schemas/reader/atom/';
+use constant NS_GOOGLE_READER =>
+    'http://www.google.com/schemas/reader/atom/';
 
 1;
 

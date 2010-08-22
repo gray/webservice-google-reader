@@ -25,6 +25,7 @@ my %conf = (
         'URI::QueryParam'       => 0,
         'XML::Atom'             => 0,
         'XML::LibXML'           => 0,
+        'parent'                => 0,
         @prereq
     },
     BUILD_REQUIRES => {

@@ -2,7 +2,7 @@ package WebService::Google::Reader::Feed;
 
 use strict;
 use warnings;
-use base qw(XML::Atom::Feed Class::Accessor::Fast);
+use parent qw(XML::Atom::Feed Class::Accessor::Fast);
 
 use WebService::Google::Reader::Constants qw(NS_GOOGLE_READER);
 

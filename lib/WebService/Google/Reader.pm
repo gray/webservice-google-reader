@@ -2,7 +2,7 @@ package WebService::Google::Reader;
 
 use strict;
 use warnings;
-use base qw(Class::Accessor::Fast);
+use parent qw(Class::Accessor::Fast);
 
 use HTTP::Request::Common qw(GET POST);
 use LWP::UserAgent;

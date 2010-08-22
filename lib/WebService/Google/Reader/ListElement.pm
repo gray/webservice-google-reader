@@ -2,7 +2,7 @@ package WebService::Google::Reader::ListElement;
 
 use strict;
 use warnings;
-use base qw(Class::Accessor::Fast);
+use parent qw(Class::Accessor::Fast);
 
 __PACKAGE__->mk_ro_accessors(qw(
     id categories count firstitemmsec label shared sortid title value
