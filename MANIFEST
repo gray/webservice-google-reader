@@ -1,5 +1,6 @@
 Changes
 ex/get-latest.pl
+ex/mark-dead-craigslist-posts.pl
 ex/reset-account.pl
 ex/search-feeds.pl
 lib/WebService/Google/Reader.pm
@@ -18,3 +19,4 @@ xt/perlcriticrc
 xt/pod.t
 xt/pod_coverage.t
 xt/portability_filenames.t
+xt/vars.t
