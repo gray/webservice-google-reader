@@ -10,6 +10,7 @@ __PACKAGE__->mk_accessors(qw(continuation count ids request));
 
 sub new {
     my ($class, %params) = @_;
+    $params{count} ||= 20;
     return bless \%params, $class;
 }
 
@@ -18,6 +19,7 @@ sub init {
 
     $self->SUPER::init(@_);
 
+    # TODO: bail if the continuation identifier hasn't changed.
     my $continuation = $self->get(NS_GOOGLE_READER, 'continuation');
     $self->continuation($continuation) if defined $continuation;
 
@@ -38,6 +40,7 @@ sub XML::Atom::Entry::stream_id {
     }
     return $stream_id;
 };
+
 
 1;
 

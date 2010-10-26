@@ -148,7 +148,8 @@ sub more {
         $req = POST($uri, [ map { ('i', $_) } @ids ]);
     }
     elsif ($feed->elem) {
-        return unless defined $feed->continuation and $feed->entries;
+        return unless defined $feed->continuation;
+        return unless $feed->entries >= $feed->count;
         $req = $feed->request;
         $req->uri->query_param(c => $feed->continuation);
     }
@@ -699,7 +700,7 @@ sub _feed {
 
     $uri->query_form(\%fields);
 
-    my $feed = (__PACKAGE__.'::Feed')->new(request => GET($uri));
+    my $feed = (__PACKAGE__.'::Feed')->new(request => GET($uri), %params);
     return $self->more($feed);
 }
 
@@ -781,6 +782,7 @@ sub _states {
         tracking-kept-unread
     );
 }
+
 
 1;
 
