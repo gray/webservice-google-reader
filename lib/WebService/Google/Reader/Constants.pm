@@ -34,12 +34,15 @@ use constant LIST_SUB_PREFS_URL => API_URL.'/preference/stream/list';
 use constant LIST_TAGS_URL => API_URL.'/tag/list';
 use constant LIST_USER_INFO_URL => READER_URL.'/user-info';
 
-use constant STREAM_IDS_URL => API_URL.'/api/0/stream/items/ids';
-use constant SEARCH_IDS_URL => API_URL.'/search/items/ids';
-use constant STREAM_IDS_CONTENT_URL => API_URL.'/stream/items/contents';
+use constant STREAM_ITEM_IDS_URL => API_URL.'/stream/items/ids';
+use constant SEARCH_ITEM_IDS_URL => API_URL.'/search/items/ids';
+use constant STREAM_FEED_CONTENTS_URL => API_URL.'/stream/contents';
+# Deprecated in favor of STREAM_FEED_CONTENTS_URL?
+use constant STREAM_ITEM_CONTENTS_URL => API_URL.'/stream/items/contents';
 
 use constant NS_GOOGLE_READER =>
     'http://www.google.com/schemas/reader/atom/';
+
 
 1;
 

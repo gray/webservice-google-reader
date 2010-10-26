@@ -101,7 +101,7 @@ sub search {
     $self->_login or return;
     $self->_token or return;
 
-    my $uri = URI->new(SEARCH_IDS_URL);
+    my $uri = URI->new(SEARCH_ITEM_IDS_URL);
 
     my %fields = (num => $params{results} || 1000);
 
@@ -144,7 +144,7 @@ sub more {
         my @ids = splice @{$feed->ids}, 0, $feed->count;
         return unless @ids;
 
-        my $uri = URI->new(STREAM_IDS_CONTENT_URL);
+        my $uri = URI->new(STREAM_FEED_CONTENTS_URL);
         $req = POST($uri, [ map { ('i', $_) } @ids ]);
     }
     elsif ($feed->elem) {
