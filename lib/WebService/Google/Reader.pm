@@ -238,7 +238,7 @@ sub rename_feed_tag {
     for my $feed (@feeds) {
         for my $cat ($self->categories) {
             for my $o ('ARRAY' eq ref $old ? @$old : ($old)) {
-                if ($old eq $cat->label or $old eq $cat->id) {
+                if ($o eq $cat->label or $o eq $cat->id) {
                     push @tagged, $feed->id;
                     next FEED;
                 }
@@ -478,7 +478,7 @@ sub opml {
 }
 
 sub ping {
-    my ($self, %fields) = @_;
+    my ($self) = @_;
     my $res = $self->_request(GET(PING_URL)) or return;
 
     return 1 if 'OK' eq $res->decoded_content;
