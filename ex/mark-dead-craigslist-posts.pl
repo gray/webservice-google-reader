@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use LWP::UserAgent;
 use Time::HiRes qw(sleep);
 use WebService::Google::Reader;
 
