@@ -25,7 +25,7 @@ __PACKAGE__->mk_accessors(qw(
 sub new {
     my ($class, %params) = @_;
 
-    my $self = bless \%params, $class;
+    my $self = bless { %params }, $class;
 
     my $ua = $params{ua};
     unless (ref $ua and $ua->isa(q(LWP::UserAgent))) {
@@ -50,11 +50,11 @@ sub new {
 }
 
 sub debug {
-    my $self = shift;
-    return $self->{debug} unless @_;
+    my ($self, $val) = @_;
+    return $self->{debug} unless 2 == @_;
 
     my $ua = $self->ua;
-    if ($self->{debug} = (shift) ? 1 : 0) {
+    if ($val) {
         my $dump_sub = sub { $_[0]->dump(maxlength => 0); return };
         $ua->set_my_handler(request_send  => $dump_sub);
         $ua->set_my_handler(response_done => $dump_sub);
@@ -64,7 +64,7 @@ sub debug {
         $ua->set_my_handler(response_done => undef);
     }
 
-    return $self->{debug};
+    return $self->{debug} = $val;
 }
 
 ## Feeds
@@ -287,7 +287,7 @@ sub edit_feed {
     for my $s ('ARRAY' eq ref $sub ? @$sub : ($sub)) {
         if (__PACKAGE__.'::Feed' eq ref $s) {
             my $id = $s->id or next;
-            $id =~ s[^(user|webfeed|tag:google\.com,2005:reader/)][];
+            $id =~ s[^(?:user|webfeed|tag:google\.com,2005:reader/)][];
             $id =~ s[\?.*][];
             push @{$fields{s}}, $id;
         }
@@ -367,6 +367,7 @@ sub mark_read_feed {
 
 sub edit_entry {
     my ($self, $entry, %params) = @_;
+    return unless $entry;
 
     $self->_login or return;
     $self->_token or return;
@@ -669,6 +670,7 @@ sub _encode_entry {
 
 sub _feed {
     my ($self, $type, $val, %params) = @_;
+    return unless $val;
 
     $self->_login or return;
 
@@ -747,6 +749,7 @@ sub _edit {
 
 sub _edit_tag {
     my ($self, $type, $tag, %params) = @_;
+    return unless $tag;
 
     $self->_login or return;
     $self->_token or return;
