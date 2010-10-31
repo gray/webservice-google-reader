@@ -144,8 +144,8 @@ sub more {
         my @ids = splice @{$feed->ids}, 0, $feed->count;
         return unless @ids;
 
-        my $uri = URI->new(STREAM_FEED_CONTENTS_URL);
-        $req = POST($uri, [ map { ('i', $_) } @ids ]);
+        my $uri = URI->new(STREAM_ITEMS_CONTENTS_URL);
+        $req = POST $uri, [ output => 'atom', map { ('i', $_) } @ids ];
     }
     elsif ($feed->elem) {
         return unless defined $feed->continuation;
@@ -677,7 +677,7 @@ sub _feed {
     $self->_login or return;
 
     my $path = $self->_public ? ATOM_PUBLIC_URL : ATOM_URL;
-    my $uri = URI->new($path . _encode_type($type, $val, 1));
+    my $uri = URI->new($path . '/' . _encode_type($type, $val, 1));
 
     my %fields;
     if (my $count = $params{count}) {
