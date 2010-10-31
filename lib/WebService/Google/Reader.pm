@@ -374,8 +374,10 @@ sub edit_entry {
 
     my %fields = (ac => 'edit');
     for my $e ('ARRAY' eq ref $entry ? @$entry : ($entry)) {
+        my $source = $e->source or next;
+        my $stream_id = $source->get_attr('gr:stream-id') or next;
         push @{$fields{i}}, $e->id;
-        push @{$fields{s}}, $e->stream_id;
+        push @{$fields{s}}, $stream_id;
     }
     return 1 unless @{$fields{i} || []};
 

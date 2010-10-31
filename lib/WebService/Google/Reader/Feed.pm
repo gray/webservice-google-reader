@@ -26,21 +26,6 @@ sub init {
     return $self;
 }
 
-sub XML::Atom::Entry::stream_id {
-    my ($self) = @_;
-
-    my $stream_id;
-    my $source = XML::Atom::Util::first($self->elem, $self->ns, 'source');
-    if ($source) {
-        $stream_id = $source->getAttribute('gr:stream-id');
-        if ($] >= 5.008) {
-            require Encode;
-            Encode::_utf8_off($stream_id) unless $XML::Atom::ForceUnicode;
-        }
-    }
-    return $stream_id;
-};
-
 
 1;
 
@@ -56,17 +41,19 @@ Subclass of C<XML::Atom::Feed>.
 
 =head1 METHODS
 
-=over
+=head2 new
 
-=item $feed = WebService::Google::Reader::Feed->B<new>(%params)
+    $feed = WebService::Google::Reader::Feed->B<new>(%params)
 
-=item $feed->B<init>(%params)
+=head2 init
 
-=item $string = $feed->B<continuation>
+    $feed->B<init>(%params)
+
+=head2 continuation
+
+    $string = $feed->B<continuation>
 
 Returns the continuation string, if any is present.
-
-=back
 
 =head1 SEE ALSO
 
