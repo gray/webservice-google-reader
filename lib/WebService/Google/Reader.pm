@@ -116,13 +116,10 @@ sub search {
     my $res = $self->_request($req) or return;
 
     my @ids = do {
-        my $ref = eval {
-            decode_json($res->decoded_content(charset => 'none'))
-        };
-        if ($@) {
+        my $ref = eval { from_json($res->decoded_content) } or do {
             $self->error("Failed to parse JSON response: $@");
             return;
-        }
+        };
         map { $_->{id} } @{$ref->{results}};
     };
     return unless @ids;
@@ -718,13 +715,10 @@ sub _list {
 
     my $res = $self->_request(GET($uri)) or return;
 
-    my $ref = eval {
-        decode_json($res->decoded_content(charset=>'none'))
-    };
-    if ($@) {
+    my $ref = eval { from_json($res->decoded_content) } or do {
         $self->error("Failed to parse JSON response: $@");
         return;
-    }
+    };
 
     # Remove an unecessary level of indirection.
     my $aref = (grep { 'ARRAY' eq ref } values %$ref)[0] || [];
