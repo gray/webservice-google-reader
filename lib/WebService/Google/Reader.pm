@@ -682,7 +682,7 @@ sub _feed {
     if (my $start_time = $params{start_time}) {
         $fields{ot} = $start_time;
     }
-    if (my $order = $params{order} || $params{sort}) {
+    if (my $order = $params{order} || $params{sort} || 'desc') {
         # m = magic/auto; not really sure what that is
         $fields{r} = 'desc' eq $order ? 'n' :
                      'asc'  eq $order ? 'o' : $order;
