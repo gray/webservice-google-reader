@@ -69,28 +69,15 @@ sub debug {
 
 ## Feeds
 
-sub feed {
-    return shift->_feed(feed => shift, @_);
-}
+sub feed  { shift->_feed(feed  => shift, @_) }
+sub tag   { shift->_feed(tag   => shift, @_) }
+sub state { shift->_feed(state => shift, @_) }
 
-sub tag {
-    return shift->_feed(tag => shift, @_);
-}
-
-sub state {
-    return shift->_feed(state => shift, @_);
-}
-
-sub shared {
-    return shift->state('broadcast', @_);
-}
-
-sub starred {
-    return shift->state('starred', @_);
-}
-
-sub unread {
-    return shift->state(
+sub shared  { shift->state('broadcast', @_) }
+sub starred { shift->state('starred',   @_) }
+sub liked   { shift->state('like', @_) }
+sub unread  {
+    shift->state(
         'reading-list', exclude => { state => 'read' }, @_
     );
 }
@@ -440,6 +427,18 @@ sub mark_read_entry {
     return shift->edit_entry(_listify(\@_), state => 'read');
 }
 
+sub like_entry {
+    return shift->edit_entry(_listify(\@_), state => 'like');
+}
+
+*like = *like = \&like_entry;
+
+sub unlike_entry {
+    return shift->edit_entry(_listify(\@_), unstate => 'like');
+}
+
+*unlike = *unlike = \&unlike_entry;
+
 ## Miscellaneous
 
 sub mark_read {
@@ -778,7 +777,7 @@ sub _states {
     return qw(
         read kept-unread fresh starred broadcast reading-list
         tracking-body-link-used tracking-emailed tracking-item-link-used
-        tracking-kept-unread
+        tracking-kept-unread like
     );
 }
 
@@ -916,6 +915,10 @@ Shortcut for B<state>('starred').
 =item B<unread>
 
 Shortcut for B<state>('reading-list', exclude => { state => 'read' })
+
+=item B<liked>
+
+Shortcut for B<state>('like').
 
 =back
 
@@ -1154,6 +1157,16 @@ Marks / unmarks all the given entries as "starred".
 =item B<mark_read_entry>(@entries|[@entries])
 
 Marks all the given entries as "read".
+
+=item B<like>(@entries|[@entries])
+
+=item B<like_entry>(@entries|[@entries])
+
+=item B<unlike>(@entries|[@entries])
+
+=item B<unlike_entry>(@entries|[@entries])
+
+Marks / unmarks all the given entries as "liked".
 
 =back
 
