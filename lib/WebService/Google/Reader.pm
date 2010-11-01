@@ -197,31 +197,31 @@ sub edit_state {
 }
 
 sub share_tag {
-    return shift->edit_tag(\@_, share => 1);
+    return shift->edit_tag(_listify(\@_), share => 1);
 }
 
 sub unshare_tag {
-    return shift->edit_tag(\@_, unshare => 1);
+    return shift->edit_tag(_listify(\@_), unshare => 1);
 }
 
 sub share_state {
-    return shift->edit_state(\@_, share => 1);
+    return shift->edit_state(_listify(\@_), share => 1);
 }
 
 sub unshare_state {
-    return shift->edit_state(\@_, unshare => 1);
+    return shift->edit_state(_listify(\@_), unshare => 1);
 }
 
 sub delete_tag {
-    return shift->edit_tag(\@_, delete => 1);
+    return shift->edit_tag(_listify(\@_), delete => 1);
 }
 
 sub mark_read_tag {
-    return shift->mark_read(tag => \@_);
+    return shift->mark_read(tag => _listify(\@_));
 }
 
 sub mark_read_state {
-    return shift->mark_read(state => \@_);
+    return shift->mark_read(state => _listify(\@_));
 }
 
 sub rename_feed_tag {
@@ -345,11 +345,11 @@ sub unstate_feed {
 }
 
 sub subscribe {
-    return shift->edit_feed(\@_, subscribe => 1);
+    return shift->edit_feed(_listify(\@_), subscribe => 1);
 }
 
 sub unsubscribe {
-    return shift->edit_feed(\@_, unsubscribe => 1);
+    return shift->edit_feed(_listify(\@_), unsubscribe => 1);
 }
 
 sub rename_feed {
@@ -357,7 +357,7 @@ sub rename_feed {
 }
 
 sub mark_read_feed {
-    return shift->mark_read(feed => \@_);
+    return shift->mark_read(feed => _listify(\@_));
 }
 
 ## Edit entries
@@ -417,27 +417,27 @@ sub unstate_entry {
 }
 
 sub share_entry {
-    return shift->edit_entry(shift, state => 'broadcast');
+    return shift->edit_entry(_listify(\@_), state => 'broadcast');
 }
 
 sub unshare_entry {
-    return shift->edit_entry(shift, unstate => 'broadcast');
+    return shift->edit_entry(_listify(\@_), unstate => 'broadcast');
 }
 
 sub star_entry {
-    return shift->edit_entry(shift, state => 'starred');
+    return shift->edit_entry(_listify(\@_), state => 'starred');
 }
 
 *star = *star = \&star_entry;
 
 sub unstar_entry {
-    return shift->edit_entry(shift, unstate => 'starred');
+    return shift->edit_entry(_listify(\@_), unstate => 'starred');
 }
 
 *unstar = *unstar = \&unstar_entry;
 
 sub mark_read_entry {
-    return shift->edit_entry(\@_, state => 'read');
+    return shift->edit_entry(_listify(\@_), state => 'read');
 }
 
 ## Miscellaneous
@@ -782,6 +782,11 @@ sub _states {
     );
 }
 
+sub _listify {
+    my ($aref) = @_;
+    return (1 == @$aref and 'ARRAY' eq ref $aref->[0]) ? @$aref : $aref;
+}
+
 
 1;
 
@@ -1025,9 +1030,9 @@ to associate / unassociate the target feeds.
 
 Associate / unassociate a list of tags / states from a feed / feeds.
 
-=item B<subscribe>(@feeds)
+=item B<subscribe>(@feeds|[@feeds])
 
-=item B<unsubscribe>(@feeds)
+=item B<unsubscribe>(@feeds|[@feeds])
 
 Subscribe or unsubscribe from a list of feeds.
 
@@ -1035,7 +1040,7 @@ Subscribe or unsubscribe from a list of feeds.
 
 Renames a feed to the given title.
 
-=item B<mark_read_feed>(@feeds)
+=item B<mark_read_feed>(@feeds|[@feeds])
 
 Marks the feeds as read.
 
@@ -1069,17 +1074,17 @@ Only tags (and not states) can be disabled.
 
 =back
 
-=item B<share_tag>(@tags)
+=item B<share_tag>(@tags|[@tags])
 
-=item B<unshare_tag>(@tags)
+=item B<unshare_tag>(@tags|[@tags])
 
-=item B<share_state>(@states)
+=item B<share_state>(@states|[@states])
 
-=item B<unshare_state>(@states)
+=item B<unshare_state>(@states|[@states])
 
 Associate / unassociate the 'broadcast' state with the given tags / states.
 
-=item B<delete_tag>(@tags)
+=item B<delete_tag>(@tags|[@tags])
 
 Delete the given tags.
 
@@ -1096,9 +1101,9 @@ Renames the tags associated with any individual entries.
 Calls B<rename_feed_tag> and B<rename_entry_tag>, and finally
 B<delete_tag>.
 
-=item B<mark_read_tag>(@tags)
+=item B<mark_read_tag>(@tags|[@tags])
 
-=item B<mark_read_state>(@states)
+=item B<mark_read_state>(@states|[@states])
 
 Marks all entries as read for the given tags / states.
 
@@ -1130,23 +1135,23 @@ Associate / unassociate the entries with the given tags / states.
 
 Associate / unassociate the entries with the given tags / states.
 
-=item B<share_entry>(@entries)
+=item B<share_entry>(@entries|[@entries])
 
-=item B<unshare_entry>(@entries)
+=item B<unshare_entry>(@entries|[@entries])
 
 Marks all the given entries as "broadcast".
 
-=item B<star>
+=item B<star>(@entries|[@entries])
 
-=item B<star_entry>
+=item B<star_entry>(@entries|[@entries])
 
-=item B<unstar>
+=item B<unstar>(@entries|[@entries])
 
-=item B<unstar_entry>
+=item B<unstar_entry>(@entries|[@entries])
 
 Marks / unmarks all the given entries as "starred".
 
-=item B<mark_read_entry>(@entries)
+=item B<mark_read_entry>(@entries|[@entries])
 
 Marks all the given entries as "read".
 
