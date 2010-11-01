@@ -13,13 +13,13 @@ my $reader = WebService::Google::Reader->new(
 my $url = '';
 
 my $feed = $reader->feed(
-    $url, count => 50, order => 'asc', exclude => { state => 'read' }
+    $url, count => 100, order => 'asc', exclude => { state => 'read' }
 );
 
 $|= 1;
 
 my ($total, $expired) = (0, 0);
-
+my @dead;
 {
     for my $entry ($feed->entries) {
         printf "%s total, %s dead\r", ++$total, $expired;
@@ -36,10 +36,12 @@ my ($total, $expired) = (0, 0);
                 been\ <a[^>]+>flagged</a>\ for\ removal
             )</h2>
         ]ix;
-        $reader->mark_read_entry($entry);
         printf "%s total, %s dead\r", $total, ++$expired;
+        push @dead, $entry;
     }
     continue { sleep 0.25 }
 
     redo if $reader->more($feed);
 }
+
+$reader->mark_read_entry(\@dead);
