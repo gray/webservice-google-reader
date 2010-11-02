@@ -3,7 +3,7 @@ Revision history for WebService-Google-Reader
 0.14  Mon Nov  1 02:51:37 UTC 2010
     - Fixed search feeds.
     - Fixed debug and compress constructor options.
-    - Added supoort for "liking" items.
+    - Added support for "liking" items.
     - Updated some methods to accept both lists and array references.
 
 0.13  Tue Oct 26 20:51:30 UTC 2010
