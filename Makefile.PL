@@ -18,7 +18,7 @@ my %conf = (
         'Encode'                => 0,
         'HTTP::Cookies'         => 0,
         'HTTP::Request::Common' => 0,
-        'JSON'                  => 0,
+        'JSON'                  => 2.0,
         'LWP::UserAgent'        => 0,
         'URI'                   => 0,
         'URI::Escape'           => 0,
@@ -43,7 +43,10 @@ my %conf = (
     clean         => { FILES => 'WebService-Google-Reader-*' },
 );
 
-my $eumm_version=$ExtUtils::MakeMaker::VERSION;
+my $eumm_version =  do {
+    no warnings 'numeric';
+    eval $ExtUtils::MakeMaker::VERSION;
+};
 delete $conf{META_MERGE} if $eumm_version < 6.46;
 $conf{PREREQ_PM} = {
     %{ $conf{PREREQ_PM} || {} }, %{ delete $conf{BUILD_REQUIRES} },
