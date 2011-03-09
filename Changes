@@ -1,5 +1,10 @@
 Revision history for WebService-Google-Reader
 
+0.15  Wed Mar  9 17:46:14 UTC 2011
+    - Updated LWP usage to accomodate a change to the default behaviour
+      (HTTPS requests now verify the hostname matches the issued certificate).
+    - Explicitly set the default sort order of entries to desc, as documented.
+
 0.14  Mon Nov  1 02:51:37 UTC 2010
     - Fixed search feeds.
     - Fixed debug and compress constructor options.
