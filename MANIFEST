@@ -1,6 +1,7 @@
 Changes
 ex/get-latest.pl
 ex/mark-dead-craigslist-posts.pl
+ex/mark-software-updates.pl
 ex/reset-account.pl
 ex/search-feeds.pl
 lib/WebService/Google/Reader.pm
