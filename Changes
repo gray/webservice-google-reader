@@ -1,5 +1,9 @@
 Revision history for WebService-Google-Reader
 
+0.16  Sun Mar 20 23:43:46 UTC 2011
+    - Added fix for google alert feeds. (ayanokouz)
+    - Added another example script.
+
 0.15  Wed Mar  9 17:46:14 UTC 2011
     - Updated LWP usage to accomodate a change to the default behaviour
       (HTTPS requests now verify the hostname matches the issued certificate).
@@ -37,7 +41,7 @@ Revision history for WebService-Google-Reader
 0.08  Sat May  2 21:02:00 UTC 2009
     - Prevented uninitialized warning.
     - Skipped login for public feed.
-    - Exposed sortid field in ListElement,
+    - Exposed sortid field in ListElement.
 
 0.07  Sat Dec 1 17:16:33 UTC 2007
     - Avoided CPANTS error_prereq by using eval with string instead of code.
