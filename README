@@ -29,7 +29,7 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2007-2010 by gray <gray@cpan.org>
+Copyright (C) 2007-2011 by gray <gray@cpan.org>
 
-This library is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
