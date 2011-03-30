@@ -2,11 +2,6 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-my @prereq;
-unless (eval { require IO::Socket::SSL; 1 }) {
-    push @prereq, 'Crypt::SSLeay' => 0;
-}
-
 my %conf = (
     NAME          => 'WebService::Google::Reader',
     AUTHOR        => 'gray <gray@cpan.org>',
@@ -19,28 +14,24 @@ my %conf = (
         'HTTP::Cookies'         => 0,
         'HTTP::Request::Common' => 0,
         'JSON'                  => 2.0,
-        'LWP::UserAgent'        => 0,
-        'URI'                   => 0,
+        'LWP::Protocol::https'  => 6.02,
+        'LWP::UserAgent'        => 6.02,
+        'URI'                   => 1.36,
         'URI::Escape'           => 0,
         'URI::QueryParam'       => 0,
         'XML::Atom'             => 0,
         'XML::LibXML'           => 0,
         'parent'                => 0,
-        @prereq
     },
-    BUILD_REQUIRES => {
-        'Test::More' => 0.82,
-    },
+    BUILD_REQUIRES => { 'Test::More' => 0.82, },
     META_MERGE     => {
-        resources  => {
+        resources => {
             repository => 'http://github.com/gray/webservice-google-reader',
         },
-        recommends => {
-            'JSON::XS' => 2.0,
-        },
+        recommends => { 'JSON::XS' => 2.0, },
     },
-    dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean         => { FILES => 'WebService-Google-Reader-*' },
+    dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean => { FILES    => 'WebService-Google-Reader-*' },
 );
 
 my $eumm_version =  do {

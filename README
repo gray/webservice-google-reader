@@ -17,8 +17,8 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
     Class::Accessor::Fast
-    Crypt::SSLeay or IO::Socket::SSL
     JSON
+    LWP::Protocol::https
     LWP::UserAgent
     Test::More
     URI

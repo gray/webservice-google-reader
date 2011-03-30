@@ -34,7 +34,6 @@ sub new {
         );
         $self->ua($ua);
     }
-    $ua->ssl_opts(verify_hostname => 0) if $ua->can('ssl_opts');
 
     $self->compress(1);
     $self->debug(0);
@@ -539,8 +538,6 @@ sub _request {
 
     $req->header(authorization => 'GoogleLogin auth=' . $self->auth)
         if $self->auth;
-    $req->header(if_ssl_cert_subject => "/CN=(?i)\Q@{[$req->uri->host]}\E\$")
-        if 'https' eq $req->uri->scheme;
 
     my $res = $self->ua->request($req);
     if ($res->is_error) {
