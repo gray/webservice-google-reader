@@ -1,5 +1,8 @@
 Revision history for WebService-Google-Reader
 
+0.17  Wed Mar 30 00:26:09 UTC 2011
+    - Required newer LWP with better HTTPS support.
+
 0.16  Sun Mar 20 23:43:46 UTC 2011
     - Added fix for google alert feeds. (ayanokouz)
     - Added another example script.
