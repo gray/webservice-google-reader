@@ -17,15 +17,19 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
     Class::Accessor::Fast
+    Encode
+    HTTP::Cookies
+    HTTP::Request::Common
     JSON
     LWP::Protocol::https
     LWP::UserAgent
     Test::More
     URI
     URI::Escape
-    URI::QueryParm
+    URI::QueryParam
     XML::Atom
     XML::LibXML
+    parent
 
 COPYRIGHT AND LICENCE
 
