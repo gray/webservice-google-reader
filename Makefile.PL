@@ -11,7 +11,6 @@ my %conf = (
     PREREQ_PM     => {
         'Class::Accessor::Fast' => 0,
         'Encode'                => 0,
-        'HTTP::Cookies'         => 0,
         'HTTP::Request::Common' => 0,
         'JSON'                  => 2.0,
         'LWP::Protocol::https'  => 6.02,

@@ -18,7 +18,6 @@ This module requires these other modules and libraries:
 
     Class::Accessor::Fast
     Encode
-    HTTP::Cookies
     HTTP::Request::Common
     JSON
     LWP::Protocol::https
