@@ -133,8 +133,10 @@ sub more {
     }
     elsif ($feed->elem) {
         return unless defined $feed->continuation;
-        return unless $feed->entries >= $feed->count;
+        return if $feed->entries < $feed->count;
         $req = $feed->request;
+        my $prev_continuation = $req->uri->query_param('c') || '';
+        return if $feed->continuation eq $prev_continuation;
         $req->uri->query_param(c => $feed->continuation);
     }
     elsif ($req = $feed->request) {
