@@ -7,7 +7,7 @@ use Cwd qw(realpath);
 use DB_File;
 use File::Find;
 use File::Spec::Functions qw(catfile catpath splitpath tmpdir);
-use LWP::Simple;
+use PerlIO::gzip;
 use WebService::Google::Reader;
 
 use constant VERBOSE => not $ENV{CRON};
@@ -49,7 +49,7 @@ my $is_perl_dist_installed = do {
     my $file = '02packages.details.txt.gz';
     my $url = "http://search.cpan.org/CPAN/modules/$file";
     $file = catfile(tmpdir, $file);
-    if (not -r $file or 1 > -M _) {
+    if (not -r $file or 1 < -M _) {
         my $res = $reader->ua->mirror($url, $file);
         die "Failed to mirror $file; " if $res->is_error;
     }
