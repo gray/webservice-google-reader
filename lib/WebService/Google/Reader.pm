@@ -73,9 +73,9 @@ sub feed  { shift->_feed(feed  => shift, @_) }
 sub tag   { shift->_feed(tag   => shift, @_) }
 sub state { shift->_feed(state => shift, @_) }
 
-sub shared  { shift->state('broadcast', @_) }
-sub starred { shift->state('starred',   @_) }
-sub liked   { shift->state('like', @_) }
+sub shared  { shift->state(broadcast => @_) }
+sub starred { shift->state(starred   => @_) }
+sub liked   { shift->state(like      => @_) }
 sub unread  {
     shift->state(
         'reading-list', exclude => { state => 'read' }, @_
@@ -129,7 +129,7 @@ sub more {
         return unless @ids;
 
         my $uri = URI->new(STREAM_ITEMS_CONTENTS_URL);
-        $req = POST $uri, [ output => 'atom', map { ('i', $_) } @ids ];
+        $req = POST $uri, [ output => 'atom', map { (i => $_) } @ids ];
     }
     elsif ($feed->elem) {
         return unless defined $feed->continuation;
@@ -154,64 +154,23 @@ sub more {
 
 ## Lists
 
-sub tags {
-    return $_[0]->_list(LIST_TAGS_URL);
-}
-
-sub feeds {
-    return $_[0]->_list(LIST_SUBS_URL);
-}
-
-sub preferences {
-    return $_[0]->_list(LIST_PREFS_URL);
-}
-
-sub counts {
-    return $_[0]->_list(LIST_COUNTS_URL);
-}
-
-sub userinfo {
-    my ($self) = @_;
-    return $_[0]->_list(LIST_USER_INFO_URL);
-}
+sub tags        { $_[0]->_list(LIST_TAGS_URL) }
+sub feeds       { $_[0]->_list(LIST_SUBS_URL) }
+sub preferences { $_[0]->_list(LIST_PREFS_URL) }
+sub counts      { $_[0]->_list(LIST_COUNTS_URL) }
+sub userinfo    { $_[0]->_list(LIST_USER_INFO_URL) }
 
 ## Edit tags
 
-sub edit_tag  {
-    return shift->_edit_tag(tag => @_);
-}
-
-sub edit_state {
-    return shift->_edit_tag(state => @_);
-}
-
-sub share_tag {
-    return shift->edit_tag(_listify(\@_), share => 1);
-}
-
-sub unshare_tag {
-    return shift->edit_tag(_listify(\@_), unshare => 1);
-}
-
-sub share_state {
-    return shift->edit_state(_listify(\@_), share => 1);
-}
-
-sub unshare_state {
-    return shift->edit_state(_listify(\@_), unshare => 1);
-}
-
-sub delete_tag {
-    return shift->edit_tag(_listify(\@_), delete => 1);
-}
-
-sub mark_read_tag {
-    return shift->mark_read(tag => _listify(\@_));
-}
-
-sub mark_read_state {
-    return shift->mark_read(state => _listify(\@_));
-}
+sub edit_tag        { shift->_edit_tag(tag   => @_) }
+sub edit_state      { shift->_edit_tag(state => @_) }
+sub share_tag       { shift->edit_tag(_listify(\@_), share   => 1) }
+sub unshare_tag     { shift->edit_tag(_listify(\@_), unshare => 1) }
+sub share_state     { shift->edit_state(_listify(\@_), share   => 1) }
+sub unshare_state   { shift->edit_state(_listify(\@_), unshare => 1) }
+sub delete_tag      { shift->edit_tag(_listify(\@_), delete => 1) }
+sub mark_read_tag   { shift->mark_read(tag   => _listify(\@_)) }
+sub mark_read_state { shift->mark_read(state => _listify(\@_)) }
 
 sub rename_feed_tag {
     my ($self, $old, $new) = @_;
@@ -317,37 +276,14 @@ sub edit_feed {
     return $self->_edit($url, %fields);
 }
 
-sub tag_feed {
-    return shift->edit_feed(shift, tag => \@_);
-}
-
-sub untag_feed {
-    return shift->edit_feed(shift, untag => \@_);
-}
-
-sub state_feed {
-    return shift->edit_feed(shift, state => \@_);
-}
-
-sub unstate_feed {
-    return shift->edit_feed(shift, unstate => \@_);
-}
-
-sub subscribe {
-    return shift->edit_feed(_listify(\@_), subscribe => 1);
-}
-
-sub unsubscribe {
-    return shift->edit_feed(_listify(\@_), unsubscribe => 1);
-}
-
-sub rename_feed {
-    return $_[0]->edit_feed($_[1], title => $_[2]);
-}
-
-sub mark_read_feed {
-    return shift->mark_read(feed => _listify(\@_));
-}
+sub tag_feed       { shift->edit_feed(shift, tag     => \@_) }
+sub untag_feed     { shift->edit_feed(shift, untag   => \@_) }
+sub state_feed     { shift->edit_feed(shift, state   => \@_) }
+sub unstate_feed   { shift->edit_feed(shift, unstate => \@_) }
+sub subscribe      { shift->edit_feed(_listify(\@_), subscribe   => 1) }
+sub unsubscribe    { shift->edit_feed(_listify(\@_), unsubscribe => 1) }
+sub mark_read_feed { shift->mark_read(feed => _listify(\@_)) }
+sub rename_feed    { $_[0]->edit_feed($_[1], title => $_[2]) }
 
 ## Edit entries
 
@@ -389,57 +325,23 @@ sub edit_entry {
     return $self->_edit($url, %fields);
 }
 
-sub tag_entry {
-    return shift->edit_entry(shift, tag => \@_);
+sub tag_entry     { shift->edit_entry(shift, tag     => \@_) }
+sub untag_entry   { shift->edit_entry(shift, untag   => \@_) }
+sub state_entry   { shift->edit_entry(shift, state   => \@_) }
+sub unstate_entry { shift->edit_entry(shift, unstate => \@_) }
+sub share_entry   { shift->edit_entry(_listify(\@_), state   => 'broadcast') }
+sub unshare_entry { shift->edit_entry(_listify(\@_), unstate => 'broadcast') }
+sub star_entry    { shift->edit_entry(_listify(\@_), state   => 'starred') }
+sub unstar_entry  { shift->edit_entry(_listify(\@_), unstate => 'starred') }
+sub mark_read_entry { shift->edit_entry(_listify(\@_), state   => 'read') }
+sub like_entry      { shift->edit_entry(_listify(\@_), state   => 'like') }
+sub unlike_entry    { shift->edit_entry(_listify(\@_), unstate => 'like') }
+
+# Create some aliases.
+for (qw(star unstar like unlike)) {
+    no strict 'refs';
+    *$_ = \&{$_.'_entry'};
 }
-
-sub untag_entry {
-    return shift->edit_entry(shift, untag => \@_);
-}
-
-sub state_entry {
-    return shift->edit_entry(shift, state => \@_);
-}
-
-sub unstate_entry {
-    return shift->edit_entry(shift, unstate => \@_);
-}
-
-sub share_entry {
-    return shift->edit_entry(_listify(\@_), state => 'broadcast');
-}
-
-sub unshare_entry {
-    return shift->edit_entry(_listify(\@_), unstate => 'broadcast');
-}
-
-sub star_entry {
-    return shift->edit_entry(_listify(\@_), state => 'starred');
-}
-
-*star = *star = \&star_entry;
-
-sub unstar_entry {
-    return shift->edit_entry(_listify(\@_), unstate => 'starred');
-}
-
-*unstar = *unstar = \&unstar_entry;
-
-sub mark_read_entry {
-    return shift->edit_entry(_listify(\@_), state => 'read');
-}
-
-sub like_entry {
-    return shift->edit_entry(_listify(\@_), state => 'like');
-}
-
-*like = *like = \&like_entry;
-
-sub unlike_entry {
-    return shift->edit_entry(_listify(\@_), unstate => 'like');
-}
-
-*unlike = *unlike = \&unlike_entry;
 
 ## Miscellaneous
 
@@ -588,21 +490,11 @@ sub _encode_type {
     my ($type, $val, $escape) = @_;
 
     my @paths;
-    if ('feed' eq $type) {
-        @paths = _encode_feed($val, $escape);
-    }
-    elsif ('tag' eq $type) {
-        @paths = _encode_tag($val);
-    }
-    elsif ('state' eq $type) {
-        @paths = _encode_state($val);
-    }
-    elsif ('entry' eq $type) {
-        @paths = _encode_entry($val);
-    }
-    else {
-        return;
-    }
+    if    ('feed'  eq $type) { @paths = _encode_feed($val, $escape) }
+    elsif ('tag'   eq $type) { @paths = _encode_tag($val) }
+    elsif ('state' eq $type) { @paths = _encode_state($val) }
+    elsif ('entry' eq $type) { @paths = _encode_entry($val) }
+    else                     { return }
 
     return wantarray ? @paths : shift @paths;
 }
