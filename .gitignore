@@ -2,5 +2,6 @@ WebService-Google-Reader-*
 Makefile
 Makefile.old
 MANIFEST.bak
+MYMETA.yml
 blib/
 pm_to_blib
