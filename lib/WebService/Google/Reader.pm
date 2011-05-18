@@ -1181,6 +1181,8 @@ Entries which have been kept unread.
 
 L<XML::Atom::Feed>
 
+L<https://groups.google.com/group/fougrapi/>
+
 L<http://code.google.com/p/pyrfeed/wiki/GoogleReaderAPI>
 
 =head1 REQUESTS AND BUGS
@@ -1218,7 +1220,7 @@ L<http://rt.cpan.org/Public/Dist/Display.html?Dist=WebService-Google-Reader>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/WebService-Google-Reader>
+L<http://search.cpan.org/dist/WebService-Google-Reader/>
 
 =back
 
