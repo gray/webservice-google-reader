@@ -1,5 +1,9 @@
 Revision history for WebService-Google-Reader
 
+0.19  Wed May 18 02:29:57 UTC 2011
+    - Fixed handling of expired tokens. (RT #68245)
+    - Added response method.
+
 0.18  Thu Apr 28 15:48:20 UTC 2011
     - Fixed corner case in 'more' method to prevent an infinite loop.
 
