@@ -19,7 +19,7 @@ our $VERSION = '0.18';
 $VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
-    auth compress error password scheme token ua username
+    auth compress error password response scheme token ua username
 ));
 
 sub new {
@@ -411,6 +411,7 @@ sub _request {
         if $self->auth;
 
     my $res = $self->ua->request($req);
+    $self->response($res);
     if ($res->is_error) {
         # Need fresh tokens.
         if (401 == $res->code and $res->message =~ /^Token /) {
@@ -431,7 +432,9 @@ sub _request {
             return $self->_request($req, ++$count);
         }
 
-        $self->error($res->status_line . ' - ' . $res->decoded_content);
+        $self->error(join ' - ',
+            'Request failed', $res->status_line, $res->header('title')
+        );
         return;
     }
 
@@ -459,7 +462,7 @@ sub _login {
     my $content = $res->decoded_content;
     my ($auth) = $content =~ m[ ^Auth=(.*)$ ]mx;
     unless ($auth) {
-        $self->error('could not find ClientLogin token');
+        $self->error('Failed to find Auth token');
         return;
     }
     $self->auth($auth);
@@ -746,7 +749,12 @@ and you want to read the response content.
 
 =item $error = $reader->B<error>
 
-Returns the error, if one occurred.
+Returns the error string, if any.
+
+=item $response = $reader->B<response>
+
+Returns an L<HTTP::Response> object for the last submitted request. Can be
+used to determine the details of an error.
 
 =back
 
