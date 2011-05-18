@@ -374,8 +374,7 @@ sub opml {
 
     $self->_login or return;
 
-    my $req = GET(EXPORT_SUBS_URL);
-    my $res = $self->_request($req) or return;
+    my $res = $self->_request(GET(EXPORT_SUBS_URL)) or return;
 
     return $res->decoded_content;
 }
@@ -392,42 +391,10 @@ sub ping {
 
 ## Private interface
 
-sub _login {
-    my ($self, $force) = @_;
-
-    return 1 if $self->_public;
-    return 1 if $self->auth and not $force;
-
-    my $uri = URI->new(LOGIN_URL);
-    $uri->query_form(
-        service => 'reader',
-        Email   => $self->username,
-        Passwd  => $self->password,
-        source  => $self->ua->agent,
-    );
-    my $res = $self->ua->post($uri);
-    my $content = $res->decoded_content;
-    if ($res->is_error) {
-        my ($err) = $content =~ m[ ^Error=(.*)$ ]mx;
-        $self->error($res->status_line . ($err ? (': '. $err) : ''));
-
-        return;
-    }
-
-    my ($auth) = $content =~ m[ ^Auth=(.*)$ ]mx;
-    unless ($auth) {
-        $self->error('could not find ClientLogin token');
-        return;
-    }
-    $self->auth($auth);
-
-    return 1;
-}
-
 sub _request {
     my ($self, $req, $count) = @_;
 
-    return if $count and 2 <= $count;
+    return if $count and 3 <= $count;
 
     # Assume all POST requests are secure.
     if ('POST' eq $req->method) {
@@ -447,14 +414,20 @@ sub _request {
     if ($res->is_error) {
         # Need fresh tokens.
         if (401 == $res->code and $res->message =~ /^Token /) {
-            print "Stale ClientLogin token- retrying\n" if $self->{debug};
+            print "Stale Auth token- retrying\n" if $self->debug;
             $self->_login(1) or return;
-            $self->_token(1) or return if $self->token;
             return $self->_request($req, ++$count);
         }
         elsif ($res->header('X-Reader-Google-Bad-Token')) {
-            print "Stale T token- retrying\n" if $self->{debug};
-            $self->_token(1);
+            print "Stale T token- retrying\n" if $self->debug;
+            $self->_token(1) or return;
+
+            # Replace the T token in the url-encoded content.
+            my $uri = URI->new;
+            $uri->query($req->content);
+            $uri->query_param(T => $self->token);
+            $req->content($uri->query);
+
             return $self->_request($req, ++$count);
         }
 
@@ -468,12 +441,38 @@ sub _request {
     return $res;
 }
 
+sub _login {
+    my ($self, $force) = @_;
+
+    return 1 if $self->_public;
+    return 1 if $self->auth and not $force;
+
+    my $uri = URI->new(LOGIN_URL);
+    $uri->query_form(
+        service => 'reader',
+        Email   => $self->username,
+        Passwd  => $self->password,
+        source  => $self->ua->agent,
+    );
+    my $res = $self->_request(POST($uri)) or return;
+
+    my $content = $res->decoded_content;
+    my ($auth) = $content =~ m[ ^Auth=(.*)$ ]mx;
+    unless ($auth) {
+        $self->error('could not find ClientLogin token');
+        return;
+    }
+    $self->auth($auth);
+
+    return 1;
+}
+
 sub _token {
     my ($self, $force) = @_;
 
     return 1 if $self->token and not $force;
 
-    $self->_login or return;
+    $self->_login($force) or return;
 
     my $uri = URI->new(TOKEN_URL);
     $uri->scheme('https');
