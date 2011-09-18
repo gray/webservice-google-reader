@@ -26,6 +26,14 @@ sub init {
     return $self;
 }
 
+# XML::Atom::entries() returns undef when there are no entries, instead of
+# an empty list, but only when using XML::LibXML.
+sub entries {
+    my $self = shift;
+    my @entries = $self->SUPER::entries(@_);
+    return @entries ? @entries : ();
+}
+
 
 1;
 
