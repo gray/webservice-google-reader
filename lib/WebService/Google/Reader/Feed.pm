@@ -26,8 +26,8 @@ sub init {
     return $self;
 }
 
-# XML::Atom::entries() returns undef when there are no entries, instead of
-# an empty list, but only when using XML::LibXML.
+# XML::Atom::Feed::entries() returns undef when there are no entries,
+# instead of an empty list, but only when using XML::LibXML.
 sub entries {
     my $self = shift;
     my @entries = $self->SUPER::entries(@_);
@@ -62,6 +62,10 @@ Subclass of C<XML::Atom::Feed>.
     $string = $feed->B<continuation>
 
 Returns the continuation string, if any is present.
+
+=head2 entries
+
+Fixes bug in C<XML::Atom::Feed::entries()>.
 
 =head1 SEE ALSO
 
