@@ -1,5 +1,8 @@
 Revision history for WebService-Google-Reader
 
+0.20  Sun Sep 18 22:02:11 UTC 2011
+    - Added fix for XML::Atom bug.
+
 0.19  Wed May 18 02:29:57 UTC 2011
     - Fixed handling of expired tokens. (RT #68245)
     - Added response method.
