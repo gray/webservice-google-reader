@@ -1,4 +1,5 @@
 verbose = 8
+only=0
 
 [CodeLayout::ProhibitHardTabs]
 allow_leading_tabs = 0
