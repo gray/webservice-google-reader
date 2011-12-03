@@ -1,5 +1,8 @@
 Revision history for WebService-Google-Reader
 
+0.21  Sat Dec  3 06:52:42 UTC 2011
+    - Really fixed the XML::Atom bug.
+
 0.20  Sun Sep 18 22:02:11 UTC 2011
     - Added fix for XML::Atom bug.
 
