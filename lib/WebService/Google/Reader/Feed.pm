@@ -30,8 +30,7 @@ sub init {
 # instead of an empty list, but only when using XML::LibXML.
 sub entries {
     my $self = shift;
-    my @entries = $self->SUPER::entries(@_);
-    return @entries ? @entries : ();
+    return @{[ $self->SUPER::entries(@_) ]};
 }
 
 
