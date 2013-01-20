@@ -14,12 +14,12 @@ use URI::QueryParam;
 use WebService::Google::Reader::Constants;
 use WebService::Google::Reader::Feed;
 use WebService::Google::Reader::ListElement;
-
 our $VERSION = '0.21';
 $VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
     auth compress error password response scheme token ua username
+    access_token
 ));
 
 sub new {
@@ -407,9 +407,17 @@ sub _request {
     $req->uri->query_param(ck => time * 1000);
     $req->uri->query_param(client => $self->ua->agent);
 
+    #Authorization: Bearer $access_token
+    #See https://developers.google.com/accounts/docs/OAuth2WebServer#callinganapi
+
+    $req->header(
+        authorization => join(
+            " " => $self->access_token->token_type,
+            $self->access_token->access_token
+        )
+    ) if $self->access_token;
     $req->header(authorization => 'GoogleLogin auth=' . $self->auth)
         if $self->auth;
-
     my $res = $self->ua->request($req);
     $self->response($res);
     if ($res->is_error) {
@@ -449,7 +457,7 @@ sub _login {
 
     return 1 if $self->_public;
     return 1 if $self->auth and not $force;
-
+    return 1 if $self->access_token and not $force;
     my $uri = URI->new(LOGIN_URL);
     $uri->query_form(
         service => 'reader',
@@ -485,7 +493,10 @@ sub _token {
 }
 
 sub _public {
-    return not $_[0]->username or not $_[0]->password;
+    my $self = shift;
+    return 0 if $self->access_token;
+    return 0 if $self->username or $self->password;
+    return 1;
 }
 
 sub _encode_type {
@@ -568,7 +579,6 @@ sub _feed {
 
     my $path = $self->_public ? ATOM_PUBLIC_URL : ATOM_URL;
     my $uri = URI->new($path . '/' . _encode_type($type, $val, 1));
-
     my %fields;
     if (my $count = $params{count}) {
         $fields{n} = $count;
