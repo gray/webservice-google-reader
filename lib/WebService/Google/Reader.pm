@@ -173,27 +173,27 @@ sub mark_read_tag   { shift->mark_read(tag   => _listify(\@_)) }
 sub mark_read_state { shift->mark_read(state => _listify(\@_)) }
 
 sub rename_feed_tag {
-    my ($self, $old, $new) = @_;
+    my ( $self, $old, $new ) = @_;
 
     my @tagged;
     my @feeds = $self->feeds or return;
 
     # Get the list of subs which are associated with the tag to be renamed.
-    FEED:
+  FEED:
     for my $feed (@feeds) {
-        for my $cat ($self->categories) {
-            for my $o ('ARRAY' eq ref $old ? @$old : ($old)) {
-                if ($o eq $cat->label or $o eq $cat->id) {
-                    push @tagged, $feed->id;
+        for my $cat ( $self->{categories} ) {
+            for my $o ( 'ARRAY' eq ref $old ? @$old : ($old) ) {
+                if ( ( defined $o && ( defined $cat->{label} && $o eq $cat->{label} ) or ( defined $cat->{id} && $o eq $cat->{id} ) ) ) {
+                    push @tagged, $feed->{id};
                     next FEED;
                 }
             }
         }
     }
 
-    $_ = [ _encode_type(tag => $_) ] for ($old, $new);
+    $_ = [ $self->_encode_type( tag => $_ ) ] for ( $old, $new );
 
-    return $self->edit_feed(\@tagged, tag => $new, untag => $old);
+    return $self->edit_feed( \@tagged, tag => $new, untag => $old );
 }
 
 sub rename_entry_tag {
@@ -213,9 +213,9 @@ sub rename_entry_tag {
 
 sub rename_tag {
     my $self = shift;
-    return unless $self->rename_tag_feed(@_);
-    return unless $self->rename_tag_entry(@_);
-    return $self->delete_tags(shift);
+    return unless $self->rename_feed_tag(@_);
+    return unless $self->rename_entry_tag(@_);
+    return $self->delete_tag(shift);
 }
 
 ## Edit feeds
