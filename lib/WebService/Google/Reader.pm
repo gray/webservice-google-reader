@@ -485,7 +485,7 @@ sub _token {
 }
 
 sub _public {
-    return not $_[0]->username or not $_[0]->password;
+    return ! ($_[0]->username and $_[0]->password);
 }
 
 sub _encode_type {
