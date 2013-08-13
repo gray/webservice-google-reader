@@ -4,7 +4,7 @@ use Test::More tests => 3;
 use WebService::Google::Reader;
 
 {
-    my $reader = WebService::Google::Reader->new;
+    my $reader = WebService::Google::Reader->new(host => 'www.inoreader.com');
     isa_ok($reader, 'WebService::Google::Reader', 'Reader->new()');
 }
 

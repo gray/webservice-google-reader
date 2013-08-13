@@ -17,6 +17,7 @@ my $file = catfile($dir, '.unwanted-modules.bdb');
 my $db = tie my %db, DB_File => $file;
 
 my $reader = WebService::Google::Reader->new(
+    host     => 'www.inoreader.com',
     username => $ENV{GOOGLE_USERNAME},
     password => $ENV{GOOGLE_PASSWORD},
 );

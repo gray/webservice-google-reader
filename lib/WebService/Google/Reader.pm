@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use parent qw(Class::Accessor::Fast);
 
+use Carp qw(croak);
 use HTTP::Request::Common qw(GET POST);
 use LWP::UserAgent;
 use JSON;
@@ -19,13 +20,19 @@ our $VERSION = '0.21';
 $VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
-    auth compress error password response scheme token ua username
+    auth compress error host password response scheme token ua username
 ));
 
 sub new {
     my ($class, %params) = @_;
 
     my $self = bless { %params }, $class;
+
+    croak q('host' is required) unless $self->host;
+    my $host = $self->host;
+    $host = "http://$host" unless $host =~ m[^https?://];
+    $host =~ s[/+$][];
+    $self->host($host);
 
     my $ua = $params{ua};
     unless (ref $ua and $ua->isa(q(LWP::UserAgent))) {
@@ -88,7 +95,7 @@ sub search {
     $self->_login or return;
     $self->_token or return;
 
-    my $uri = URI->new(SEARCH_ITEM_IDS_URL);
+    my $uri = URI->new($self->host . SEARCH_ITEM_IDS_PATH);
 
     my %fields = (num => $params{results} || 1000);
 
@@ -128,7 +135,7 @@ sub more {
         my @ids = splice @{$feed->ids}, 0, $feed->count;
         return unless @ids;
 
-        my $uri = URI->new(STREAM_ITEMS_CONTENTS_URL);
+        my $uri = URI->new($self->host . STREAM_ITEMS_CONTENTS_PATH);
         $req = POST $uri, [ output => 'atom', map { (i => $_) } @ids ];
     }
     elsif ($feed->elem) {
@@ -154,11 +161,11 @@ sub more {
 
 ## Lists
 
-sub tags        { $_[0]->_list(LIST_TAGS_URL) }
-sub feeds       { $_[0]->_list(LIST_SUBS_URL) }
-sub preferences { $_[0]->_list(LIST_PREFS_URL) }
-sub counts      { $_[0]->_list(LIST_COUNTS_URL) }
-sub userinfo    { $_[0]->_list(LIST_USER_INFO_URL) }
+sub tags        { $_[0]->_list($_[0]->host . LIST_TAGS_PATH) }
+sub feeds       { $_[0]->_list($_[0]->host . LIST_SUBS_PATH) }
+sub preferences { $_[0]->_list($_[0]->host . LIST_PREFS_PATH) }
+sub counts      { $_[0]->_list($_[0]->host . LIST_COUNTS_PATH) }
+sub userinfo    { $_[0]->_list($_[0]->host . LIST_USER_INFO_PATH) }
 
 ## Edit tags
 
@@ -226,7 +233,7 @@ sub edit_feed {
     $self->_login or return;
     $self->_token or return;
 
-    my $url = EDIT_SUB_URL;
+    my $url = $self->host . EDIT_SUB_PATH;
 
     my %fields;
     for my $s ('ARRAY' eq ref $sub ? @$sub : ($sub)) {
@@ -303,7 +310,7 @@ sub edit_entry {
     }
     return 1 unless @{$fields{i} || []};
 
-    my $url = EDIT_ENTRY_TAG_URL;
+    my $url = $self->host . EDIT_ENTRY_TAG_PATH;
 
     # Add a tag or state.
     for my $t (qw(tag state)) {
@@ -357,7 +364,7 @@ sub mark_read {
         push @{$fields{s}}, _encode_type($type, $params{$type});
     }
 
-    return $self->_edit(EDIT_MARK_READ_URL, %fields);
+    return $self->_edit($self->host . EDIT_MARK_READ_PATH, %fields);
 }
 
 sub edit_preference {
@@ -366,7 +373,7 @@ sub edit_preference {
     $self->_login or return;
     $self->_token or return;
 
-    return $self->_edit(EDIT_PREF_URL, k => $key, v => $val);
+    return $self->_edit($self->host . EDIT_PREF_PATH, k => $key, v => $val);
 }
 
 sub opml {
@@ -374,14 +381,14 @@ sub opml {
 
     $self->_login or return;
 
-    my $res = $self->_request(GET(EXPORT_SUBS_URL)) or return;
+    my $res = $self->_request(GET($self->host . EXPORT_SUBS_PATH)) or return;
 
     return $res->decoded_content;
 }
 
 sub ping {
     my ($self) = @_;
-    my $res = $self->_request(GET(PING_URL)) or return;
+    my $res = $self->_request(GET($self->host . PING_PATH)) or return;
 
     return 1 if 'OK' eq $res->decoded_content;
 
@@ -450,7 +457,7 @@ sub _login {
     return 1 if $self->_public;
     return 1 if $self->auth and not $force;
 
-    my $uri = URI->new(LOGIN_URL);
+    my $uri = URI->new($self->host . LOGIN_PATH);
     $uri->query_form(
         service => 'reader',
         Email   => $self->username,
@@ -477,7 +484,7 @@ sub _token {
 
     $self->_login($force) or return;
 
-    my $uri = URI->new(TOKEN_URL);
+    my $uri = URI->new($self->host . TOKEN_PATH);
     $uri->scheme('https');
     my $res = $self->_request(GET($uri)) or return;
 
@@ -566,7 +573,7 @@ sub _feed {
 
     $self->_login or return;
 
-    my $path = $self->_public ? ATOM_PUBLIC_URL : ATOM_URL;
+    my $path = $self->host . ($self->_public ? ATOM_PUBLIC_PATH : ATOM_PATH);
     my $uri = URI->new($path . '/' . _encode_type($type, $val, 1));
 
     my %fields;
@@ -648,15 +655,15 @@ sub _edit_tag {
 
     my $url;
     if (grep { exists $params{$_} } qw(share public)) {
-        $url = EDIT_TAG_SHARE_URL;
+        $url = $self->host . EDIT_TAG_SHARE_PATH;
         $fields{pub} = 'true';
     }
     elsif (grep { exists $params{$_} } qw(unshare private)) {
-        $url = EDIT_TAG_SHARE_URL;
+        $url = $self->host . EDIT_TAG_SHARE_PATH;
         $fields{pub} = 'false';
     }
     elsif (grep { exists $params{$_} } qw(disable delete)) {
-        $url = EDIT_TAG_DISABLE_URL;
+        $url = $self->host . EDIT_TAG_DISABLE_PATH;
         $fields{ac} = 'disable-tags';
     }
     else {
@@ -687,13 +694,14 @@ __END__
 
 =head1 NAME
 
-WebService::Google::Reader - Perl interface to Google Reader
+WebService::Google::Reader - Perl interface to the Google Reader API
 
 =head1 SYNOPSIS
 
     use WebService::Google::Reader;
 
     my $reader = WebService::Google::Reader->new(
+        host     => 'www.inoreader.com',
         username => $user,
         password => $pass,
     );
@@ -708,8 +716,9 @@ WebService::Google::Reader - Perl interface to Google Reader
 
 =head1 DESCRIPTION
 
-The C<WebService::Google::Reader> module provides an interface to the
-Google Reader service through the unofficial (as-yet unpublished) API.
+The C<WebService::Google::Reader> module provides an interface to webservices
+using the Google Reader API. The only tested webservice at this time is
+L<www.inoreader.com>.
 
 =head1 METHODS
 
@@ -721,6 +730,10 @@ Creates a new WebService::Google::Reader object. The following named
 parameters are accepted:
 
 =over
+
+=item B<host>
+
+The hostname of the service.
 
 =item B<username> and B<password>
 
@@ -1185,6 +1198,8 @@ L<https://groups.google.com/group/fougrapi/>
 
 L<http://code.google.com/p/pyrfeed/wiki/GoogleReaderAPI>
 
+L<http://wiki.inoreader.com/doku.php?id=api>
+
 =head1 REQUESTS AND BUGS
 
 Please report any bugs or feature requests to
@@ -1226,7 +1241,7 @@ L<http://search.cpan.org/dist/WebService-Google-Reader/>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007-2011 gray <gray at cpan.org>, all rights reserved.
+Copyright (C) 2007-2013 gray <gray at cpan.org>, all rights reserved.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

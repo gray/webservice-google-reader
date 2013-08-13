@@ -5,9 +5,11 @@ use Time::HiRes qw(sleep);
 use WebService::Google::Reader;
 
 my $reader = WebService::Google::Reader->new(
-    username => '',
-    password => '',
+    host     => 'www.inoreader.com',
+    username => $ENV{GOOGLE_USERNAME},
+    password => $ENV{GOOGLE_PASSWORD},
 );
+
 # This above account should be subscribed to this feed.
 # Example: http://sfbay.craigslist.org/search/sss?query=shiny&format=rss
 my $url = '';

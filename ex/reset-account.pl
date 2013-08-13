@@ -7,6 +7,7 @@ use WebService::Google::Reader;
 # storing the list of prefs and their defaults.
 
 my $reader = WebService::Google::Reader->new(
+    host     => 'www.inoreader.com',
     username => $ENV{GOOGLE_USERNAME},
     password => $ENV{GOOGLE_PASSWORD},
 );

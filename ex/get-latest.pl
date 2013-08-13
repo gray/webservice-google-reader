@@ -6,6 +6,7 @@ use WebService::Google::Reader;
 my $continue = shift;
 
 my $reader = WebService::Google::Reader->new(
+    host => 'www.inoreader.com',
     username => $ENV{GOOGLE_USERNAME},
     password => $ENV{GOOGLE_PASSWORD},
 );

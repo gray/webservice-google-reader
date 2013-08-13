@@ -7,6 +7,7 @@ my $query = shift or die "missing query";
 my @feeds = @ARGV;
 
 my $reader = WebService::Google::Reader->new(
+    host     => 'www.inoreader.com',
     username => $ENV{GOOGLE_USERNAME},
     password => $ENV{GOOGLE_PASSWORD},
 );
