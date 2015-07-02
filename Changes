@@ -1,5 +1,9 @@
 Revision history for WebService-Google-Reader
 
+0.23  Thu Jul  2 18:56:20 UTC 2015
+    - Added support for appid and appkey because Inoreader now requires them.
+      (RT #105624)
+
 0.22  Tue Aug 13 16:52:44 UTC 2013
     - Required host of webservice to be given.
 
@@ -24,7 +28,7 @@ Revision history for WebService-Google-Reader
     - Added another example script.
 
 0.15  Wed Mar  9 17:46:14 UTC 2011
-    - Updated LWP usage to accomodate a change to the default behaviour
+    - Updated LWP usage to accommodate a change to the default behaviour
       (HTTPS requests now verify the hostname matches the issued certificate).
     - Explicitly set the default sort order of entries to desc, as documented.
 
