@@ -1198,7 +1198,7 @@ L<https://groups.google.com/group/fougrapi/>
 
 L<http://code.google.com/p/pyrfeed/wiki/GoogleReaderAPI>
 
-L<http://wiki.inoreader.com/doku.php?id=api>
+L<http://www.inoreader.com/developers/>
 
 =head1 REQUESTS AND BUGS
 
