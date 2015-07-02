@@ -1,11 +1,26 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More;
 use WebService::Google::Reader;
 
 {
-    my $reader = WebService::Google::Reader->new(host => 'www.inoreader.com');
+    my $reader = WebService::Google::Reader->new(host => 'somereader.com');
     isa_ok($reader, 'WebService::Google::Reader', 'Reader->new()');
+}
+
+{
+    local $@;
+    eval {
+        WebService::Google::Reader->new(host => 'www.inoreader.com');
+    };
+    like $@, qr/^'appid' and 'appkey' are required/, 'appid and appkey';
+
+    my $reader = WebService::Google::Reader->new(
+        host   => 'www.inoreader.com',
+        appid  => 'MyAppId',
+        appkey => 'MyAppKey',
+    );
+    isa_ok($reader, 'WebService::Google::Reader', 'Reader->new - inoreader');
 }
 
 {
@@ -41,3 +56,5 @@ use WebService::Google::Reader;
     );
     can_ok('WebService::Google::Reader::Feed', @methods);
 }
+
+done_testing;

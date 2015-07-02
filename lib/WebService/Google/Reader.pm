@@ -20,7 +20,8 @@ our $VERSION = '0.22';
 $VERSION = eval $VERSION;
 
 __PACKAGE__->mk_accessors(qw(
-    auth compress error host password response scheme token ua username
+    appid appkey auth compress error host password response scheme token ua
+    username
 ));
 
 sub new {
@@ -33,6 +34,11 @@ sub new {
     $host = "http://$host" unless $host =~ m[^https?://];
     $host =~ s[/+$][];
     $self->host($host);
+
+    if ($host =~ /(^|\.)inoreader\.com$/i) {
+        croak q('appid' and 'appkey' are required by inoreader)
+            unless defined $self->appid and defined $self->appkey;
+    }
 
     my $ua = $params{ua};
     unless (ref $ua and $ua->isa(q(LWP::UserAgent))) {
@@ -414,6 +420,8 @@ sub _request {
     $req->uri->query_param(ck => time * 1000);
     $req->uri->query_param(client => $self->ua->agent);
 
+    $req->header(AppId => $self->appid, AppKey => $self->appkey)
+        if defined $self->appid and defined $self->appkey;
     $req->header(authorization => 'GoogleLogin auth=' . $self->auth)
         if $self->auth;
 
@@ -702,8 +710,10 @@ WebService::Google::Reader - Perl interface to the Google Reader API
 
     my $reader = WebService::Google::Reader->new(
         host     => 'www.inoreader.com',
-        username => $user,
-        password => $pass,
+        appid    => $appid,
+        appkey   => $appey,
+        username => $username,
+        password => $password,
     );
 
     my $feed = $reader->unread(count => 100);
@@ -739,6 +749,12 @@ The hostname of the service.
 
 Required for accessing any personalized or account-related functionality
 (reading-list, editing, etc.).
+
+=item B<appid> and B<appkey>
+
+Inoreader requires users to also obtain an appid and appkey.
+
+See L<http://www.inoreader.com/developers/register-app>
 
 =item B<https> / B<secure>
 
