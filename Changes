@@ -1,5 +1,10 @@
 Revision history for WebService-Google-Reader
 
+0.24  Wed Jun 14 22:19:38 UTC 2017
+    - Fixed calls to incorrect method names.
+    - Switched to Class::Tiny from Class::Accessor::Fast.
+    - Switched to JSON::MaybeXS from JSON.
+
 0.23  Thu Jul  2 18:56:20 UTC 2015
     - Added support for appid and appkey because Inoreader now requires them.
       (RT #105624)
