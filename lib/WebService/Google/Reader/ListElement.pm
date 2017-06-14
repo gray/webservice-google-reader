@@ -2,22 +2,17 @@ package WebService::Google::Reader::ListElement;
 
 use strict;
 use warnings;
-use parent qw(Class::Accessor::Fast);
 
-__PACKAGE__->mk_ro_accessors(qw(
+use Class::Tiny qw(
     id categories count firstitemmsec label shared sortid title value
     isBloggerUser userId userEmail
-));
+);
 
-sub new {
-    my ($class, $ref) = @_;
-    my $self = bless $ref, $class;
-    if (exists $self->{categories}) {
-        for my $cat (@{$self->{categories}}) {
-            $cat = __PACKAGE__->new($cat);
-        }
+sub BUILD {
+    my ($self, $params) = @_;
+    for my $cat (@{ $self->categories || [] }) {
+        $cat = __PACKAGE__->new($cat);
     }
-    return $self;
 }
 
 use overload q("") => sub { $_[0]->id };

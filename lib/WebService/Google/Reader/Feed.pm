@@ -2,17 +2,19 @@ package WebService::Google::Reader::Feed;
 
 use strict;
 use warnings;
-use parent qw(XML::Atom::Feed Class::Accessor::Fast);
+use parent qw(XML::Atom::Feed);
 
 use WebService::Google::Reader::Constants qw(NS_GOOGLE_READER);
 
-__PACKAGE__->mk_accessors(qw(continuation count ids request));
+use Class::Tiny qw(continuation count ids request);
+
 
 sub new {
     my ($class, %params) = @_;
-    $params{count} ||= 20;
+    $params{count} = 20 unless $params{count} and 0 < $params{count};
     return bless \%params, $class;
 }
+
 
 sub init {
     my $self = shift;
@@ -25,6 +27,7 @@ sub init {
 
     return $self;
 }
+
 
 # XML::Atom::Feed::entries() returns undef when there are no entries,
 # instead of an empty list, but only when using XML::LibXML.

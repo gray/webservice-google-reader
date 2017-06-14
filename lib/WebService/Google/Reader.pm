@@ -2,7 +2,6 @@ package WebService::Google::Reader;
 
 use strict;
 use warnings;
-use parent qw(Class::Accessor::Fast);
 
 use Carp qw(croak);
 use HTTP::Request::Common qw(GET POST);
@@ -19,15 +18,14 @@ use WebService::Google::Reader::ListElement;
 our $VERSION = '0.23';
 $VERSION = eval $VERSION;
 
-__PACKAGE__->mk_accessors(qw(
+use Class::Tiny qw(
     appid appkey auth compress error host password response scheme token ua
     username
-));
+);
 
-sub new {
-    my ($class, %params) = @_;
 
-    my $self = bless { %params }, $class;
+sub BUILD {
+    my ($self, $params) = @_;
 
     croak q('host' is required) unless $self->host;
     my $host = $self->host;
@@ -40,27 +38,21 @@ sub new {
             unless defined $self->appid and defined $self->appkey;
     }
 
-    my $ua = $params{ua};
-    unless (ref $ua and $ua->isa(q(LWP::UserAgent))) {
-        $ua = LWP::UserAgent->new(
-            agent => __PACKAGE__.'/'.$VERSION,
-        );
-        $self->ua($ua);
+    unless (ref $self->ua and $self->ua->isa(q(LWP::UserAgent))) {
+       $self->ua(LWP::UserAgent->new(agent => __PACKAGE__.'/'.$VERSION));
     }
 
-    $self->compress(1);
-    $self->debug(0);
-    for my $accessor (qw( compress debug )) {
-        $self->$accessor($params{$accessor}) if exists $params{$accessor};
-    }
+    $self->compress(exists $params->{compress} ? $params->{compress} : 1);
+    $self->debug(exists $params->{debug}       ? $params->{debug}    : 0);
 
-    $ua->default_header(accept_encoding => 'gzip,deflate')
+    $self->ua->default_header(accept_encoding => 'gzip,deflate')
         if $self->compress;
 
-    $self->scheme($params{secure} || $params{https} ? 'https' : 'http');
+    $self->scheme($params->{secure} || $params->{https} ? 'https' : 'http');
 
     return $self;
 }
+
 
 sub debug {
     my ($self, $val) = @_;
@@ -80,6 +72,7 @@ sub debug {
     return $self->{debug} = $val;
 }
 
+
 ## Feeds
 
 sub feed  { shift->_feed(feed  => shift, @_) }
@@ -94,6 +87,7 @@ sub unread  {
         'reading-list', exclude => { state => 'read' }, @_
     );
 }
+
 
 sub search {
     my ($self, $query, %params) = @_;
@@ -133,6 +127,7 @@ sub search {
     return $self->more($feed);
 }
 
+
 sub more {
     my ($self, $feed) = @_;
 
@@ -165,6 +160,7 @@ sub more {
 
 *previous = *previous = *next = *next = \&more;
 
+
 ## Lists
 
 sub tags        { $_[0]->_list($_[0]->host . LIST_TAGS_PATH) }
@@ -184,6 +180,7 @@ sub unshare_state   { shift->edit_state(_listify(\@_), unshare => 1) }
 sub delete_tag      { shift->edit_tag(_listify(\@_), delete => 1) }
 sub mark_read_tag   { shift->mark_read(tag   => _listify(\@_)) }
 sub mark_read_state { shift->mark_read(state => _listify(\@_)) }
+
 
 sub rename_feed_tag {
     my ($self, $old, $new) = @_;
@@ -209,6 +206,7 @@ sub rename_feed_tag {
     return $self->edit_feed(\@tagged, tag => $new, untag => $old);
 }
 
+
 sub rename_entry_tag {
     my ($self, $old, $new) = @_;
 
@@ -224,12 +222,14 @@ sub rename_entry_tag {
     return 1;
 }
 
+
 sub rename_tag {
     my $self = shift;
     return unless $self->rename_feed_tag(@_);
     return unless $self->rename_entry_tag(@_);
     return $self->delete_tag(shift);
 }
+
 
 ## Edit feeds
 
@@ -289,6 +289,7 @@ sub edit_feed {
     return $self->_edit($url, %fields);
 }
 
+
 sub tag_feed       { shift->edit_feed(shift, tag     => \@_) }
 sub untag_feed     { shift->edit_feed(shift, untag   => \@_) }
 sub state_feed     { shift->edit_feed(shift, state   => \@_) }
@@ -297,6 +298,7 @@ sub subscribe      { shift->edit_feed(_listify(\@_), subscribe   => 1) }
 sub unsubscribe    { shift->edit_feed(_listify(\@_), unsubscribe => 1) }
 sub mark_read_feed { shift->mark_read(feed => _listify(\@_)) }
 sub rename_feed    { $_[0]->edit_feed($_[1], title => $_[2]) }
+
 
 ## Edit entries
 
@@ -338,6 +340,7 @@ sub edit_entry {
     return $self->_edit($url, %fields);
 }
 
+
 sub tag_entry     { shift->edit_entry(shift, tag     => \@_) }
 sub untag_entry   { shift->edit_entry(shift, untag   => \@_) }
 sub state_entry   { shift->edit_entry(shift, state   => \@_) }
@@ -356,6 +359,7 @@ for (qw(star unstar like unlike)) {
     *$_ = \&{$_.'_entry'};
 }
 
+
 ## Miscellaneous
 
 sub mark_read {
@@ -373,6 +377,7 @@ sub mark_read {
     return $self->_edit($self->host . EDIT_MARK_READ_PATH, %fields);
 }
 
+
 sub edit_preference {
     my ($self, $key, $val) = @_;
 
@@ -381,6 +386,7 @@ sub edit_preference {
 
     return $self->_edit($self->host . EDIT_PREF_PATH, k => $key, v => $val);
 }
+
 
 sub opml {
     my ($self) = @_;
@@ -392,6 +398,7 @@ sub opml {
     return $res->decoded_content;
 }
 
+
 sub ping {
     my ($self) = @_;
     my $res = $self->_request(GET($self->host . PING_PATH)) or return;
@@ -401,6 +408,7 @@ sub ping {
     $self->error('Ping failed: '. $res->decoded_content);
     return;
 }
+
 
 ## Private interface
 
@@ -459,6 +467,7 @@ sub _request {
     return $res;
 }
 
+
 sub _login {
     my ($self, $force) = @_;
 
@@ -485,6 +494,7 @@ sub _login {
     return 1;
 }
 
+
 sub _token {
     my ($self, $force) = @_;
 
@@ -499,9 +509,11 @@ sub _token {
     return $self->token($res->decoded_content);
 }
 
+
 sub _public {
     return ! ($_[0]->username and $_[0]->password);
 }
+
 
 sub _encode_type {
     my ($type, $val, $escape) = @_;
@@ -516,6 +528,7 @@ sub _encode_type {
     return wantarray ? @paths : shift @paths;
 }
 
+
 sub _encode_feed {
     my ($feed, $escape) = @_;
 
@@ -529,6 +542,7 @@ sub _encode_feed {
 
     return @paths;
 }
+
 
 sub _encode_tag {
     my ($tag) = @_;
@@ -545,6 +559,7 @@ sub _encode_tag {
     return @paths;
 }
 
+
 sub _encode_state {
     my ($state) = @_;
 
@@ -560,6 +575,7 @@ sub _encode_state {
     return @paths;
 }
 
+
 sub _encode_entry {
     my ($entry) = @_;
 
@@ -574,6 +590,7 @@ sub _encode_entry {
 
     return @paths;
 }
+
 
 sub _feed {
     my ($self, $type, $val, %params) = @_;
@@ -613,6 +630,7 @@ sub _feed {
     return $self->more($feed);
 }
 
+
 sub _list {
     my ($self, $url) = @_;
 
@@ -638,6 +656,7 @@ sub _list {
     return @$aref
 }
 
+
 sub _edit {
     my ($self, $url, %fields) = @_;
     my $uri = URI->new($url);
@@ -650,6 +669,7 @@ sub _edit {
     $self->error('Edit failed: '. $res->decoded_content);
     return;
 }
+
 
 sub _edit_tag {
     my ($self, $type, $tag, %params) = @_;
@@ -682,6 +702,7 @@ sub _edit_tag {
     return $self->_edit($url, %fields);
 }
 
+
 sub _states {
     return qw(
         read kept-unread fresh starred broadcast reading-list
@@ -689,6 +710,7 @@ sub _states {
         tracking-kept-unread like
     );
 }
+
 
 sub _listify {
     my ($aref) = @_;
