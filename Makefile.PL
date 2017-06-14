@@ -12,7 +12,7 @@ my %conf = (
         'Class::Tiny'           => 0,
         'Encode'                => 0,
         'HTTP::Request::Common' => 0,
-        'JSON'                  => 2.0,
+        'JSON::MaybeXS'         => 0,
         'LWP::Protocol::https'  => 6.02,
         'LWP::UserAgent'        => 6.02,
         'URI'                   => 1.36,
@@ -27,7 +27,6 @@ my %conf = (
         resources => {
             repository => 'http://github.com/gray/webservice-google-reader',
         },
-        recommends => { 'JSON::XS' => 2.0, },
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES    => 'WebService-Google-Reader-*' },

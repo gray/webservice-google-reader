@@ -6,7 +6,7 @@ use warnings;
 use Carp qw(croak);
 use HTTP::Request::Common qw(GET POST);
 use LWP::UserAgent;
-use JSON;
+use JSON::MaybeXS;
 use URI;
 use URI::Escape;
 use URI::QueryParam;
@@ -110,7 +110,7 @@ sub search {
     my $res = $self->_request($req) or return;
 
     my @ids = do {
-        my $ref = eval { from_json($res->decoded_content) } or do {
+        my $ref = eval { JSON->new->decode($res->decoded_content) } or do {
             $self->error("Failed to parse JSON response: $@");
             return;
         };
@@ -641,7 +641,7 @@ sub _list {
 
     my $res = $self->_request(GET($uri)) or return;
 
-    my $ref = eval { from_json($res->decoded_content) } or do {
+    my $ref = eval { JSON->new->decode($res->decoded_content) } or do {
         $self->error("Failed to parse JSON response: $@");
         return;
     };
