@@ -226,9 +226,9 @@ sub rename_entry_tag {
 
 sub rename_tag {
     my $self = shift;
-    return unless $self->rename_tag_feed(@_);
-    return unless $self->rename_tag_entry(@_);
-    return $self->delete_tags(shift);
+    return unless $self->rename_feed_tag(@_);
+    return unless $self->rename_entry_tag(@_);
+    return $self->delete_tag(shift);
 }
 
 ## Edit feeds
