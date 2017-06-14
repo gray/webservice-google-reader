@@ -1279,10 +1279,10 @@ L<http://search.cpan.org/dist/WebService-Google-Reader/>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007-2015 gray <gray at cpan.org>, all rights reserved.
+Copyright (C) 2007-2017 gray <gray at cpan.org>, all rights reserved.
 
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =head1 AUTHOR
 
