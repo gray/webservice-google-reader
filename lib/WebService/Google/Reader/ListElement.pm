@@ -10,7 +10,7 @@ use Class::Tiny qw(
 
 sub BUILD {
     my ($self, $params) = @_;
-    for my $cat (@{ $self->categories || [] }) {
+    for my $cat (@{ $params->{categories} || [] }) {
         $cat = __PACKAGE__->new($cat);
     }
 }

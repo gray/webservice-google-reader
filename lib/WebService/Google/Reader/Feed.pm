@@ -6,13 +6,19 @@ use parent qw(XML::Atom::Feed);
 
 use WebService::Google::Reader::Constants qw(NS_GOOGLE_READER);
 
-use Class::Tiny qw(continuation count ids request);
+use Class::Tiny qw(continuation count _ids _request);
 
 
 sub new {
     my ($class, %params) = @_;
-    $params{count} = 20 unless $params{count} and 0 < $params{count};
-    return bless \%params, $class;
+    my $self = bless \%params, $class;
+
+    $self->count(40) unless $self->count and 0 < $self->count;
+    if (my $req = $self->_request) {
+        $req->uri->query_param(n => $self->count);
+    }
+
+    return $self;
 }
 
 
@@ -65,9 +71,13 @@ Subclass of C<XML::Atom::Feed>.
 
 Returns the continuation string, if any is present.
 
+=head2 count
+
+The number of entries per fetch: defaults to 40.
+
 =head2 entries
 
-Fixes bug in C<XML::Atom::Feed::entries()>.
+Override the method from C<XML::Atom::Feed> to work around a bug.
 
 =head1 SEE ALSO
 

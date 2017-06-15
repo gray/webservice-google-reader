@@ -25,7 +25,7 @@ use WebService::Google::Reader;
 
 {
     my @methods = qw(
-        auth error password scheme token ua username
+        auth error password _scheme token ua username
 
         feed tag state shared starred unread search more previous
 
@@ -52,7 +52,7 @@ use WebService::Google::Reader;
 
 {
     my @methods = qw(
-        continuation count ids request
+        continuation count _ids _request
     );
     can_ok('WebService::Google::Reader::Feed', @methods);
 }

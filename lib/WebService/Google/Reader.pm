@@ -19,7 +19,7 @@ our $VERSION = '0.24';
 $VERSION = eval $VERSION;
 
 use Class::Tiny qw(
-    appid appkey auth compress error host password response scheme token ua
+    appid appkey auth compress error host password response _scheme token ua
     username
 );
 
@@ -48,7 +48,7 @@ sub BUILD {
     $self->ua->default_header(accept_encoding => 'gzip,deflate')
         if $self->compress;
 
-    $self->scheme($params->{secure} || $params->{https} ? 'https' : 'http');
+    $self->_scheme($params->{secure} || $params->{https} ? 'https' : 'http');
 
     return $self;
 }
@@ -121,9 +121,7 @@ sub search {
         @ids = reverse @ids if 'asc' eq $order;
     }
 
-    my $feed = (__PACKAGE__.'::Feed')->new(
-        request => $req, ids => \@ids, count => $params{count} || 40,
-    );
+    my $feed = (__PACKAGE__.'::Feed')->new(_request => $req, _ids => \@ids);
     return $self->more($feed);
 }
 
@@ -132,8 +130,8 @@ sub more {
     my ($self, $feed) = @_;
 
     my $req;
-    if (defined $feed->ids) {
-        my @ids = splice @{$feed->ids}, 0, $feed->count;
+    if (defined $feed->_ids) {
+        my @ids = splice @{$feed->_ids}, 0, $feed->count;
         return unless @ids;
 
         my $uri = URI->new($self->host . STREAM_ITEMS_CONTENTS_PATH);
@@ -142,12 +140,12 @@ sub more {
     elsif ($feed->elem) {
         return unless defined $feed->continuation;
         return if $feed->entries < $feed->count;
-        $req = $feed->request;
+        $req = $feed->_request;
         my $prev_continuation = $req->uri->query_param('c') || '';
         return if $feed->continuation eq $prev_continuation;
         $req->uri->query_param(c => $feed->continuation);
     }
-    elsif ($req = $feed->request) {
+    elsif ($req = $feed->_request) {
         # Initial request.
     }
     else { return }
@@ -422,7 +420,7 @@ sub _request {
         $req->uri->scheme('https');
     }
     elsif ('GET' eq $req->method and 'https' ne $req->uri->scheme) {
-        $req->uri->scheme($self->scheme);
+        $req->uri->scheme($self->_scheme);
     }
 
     $req->uri->query_param(ck => time * 1000);
@@ -602,9 +600,6 @@ sub _feed {
     my $uri = URI->new($path . '/' . _encode_type($type, $val, 1));
 
     my %fields;
-    if (my $count = $params{count}) {
-        $fields{n} = $count;
-    }
     if (my $start_time = $params{start_time}) {
         $fields{ot} = $start_time;
     }
@@ -626,7 +621,7 @@ sub _feed {
 
     $uri->query_form(\%fields);
 
-    my $feed = (__PACKAGE__.'::Feed')->new(request => GET($uri), %params);
+    my $feed = (__PACKAGE__.'::Feed')->new(_request => GET($uri), %params);
     return $self->more($feed);
 }
 
@@ -900,8 +895,8 @@ The sort order of the entries: B<desc> (default) or B<asc> in time.
 
 =item B<more> / B<previous> / B<next>
 
-A feed generator only returns B<$count> entries. If more are available,
-calling this method will return a feed with the next B<$count> entries.
+A feed generator only returns B<count> entries. If more are available,
+calling this method will return a feed with the next B<count> entries.
 
 =back
 
@@ -1151,26 +1146,34 @@ The following private methods may be of use to others.
 
 =item B<_login>
 
-This is automatically called from within methods that require
-authorization.  An optional parameter is accepted which when true, will
-force a login even if a previous login was successful. The end result of
-a successful login is to set the auth token.
+This is automatically called from within methods that require authorization.
+An optional parameter is accepted which when true, will force a login even if
+a previous login was successful. The end result of a successful login is to
+set the B<auth> token.
 
 =item B<_request>
 
-Given an C<HTTP::Request>, this will perform the request and if the
-response indicates a bad (expired) token, it will request another token
-before performing the request again. Returns an C<HTTP::Response> on
-success, false on failure (check B<error>).
-
-=item B<_token>
-
-This is automatically called from within methods that require a user token.
-If successful, the token is available via the B<token> accessor.
+Given an C<HTTP::Request>, this will perform the request and if the response
+indicates a bad (expired) token, it will request another token before
+performing the request again. Returns an C<HTTP::Response> on success, false
+on failure (check B<error>).
 
 =item B<_states>
 
 Returns a list of all the known states. See L</STATES>.
+
+=item B<_token>
+
+This is automatically called from within methods that require a user token. It
+fetches a new token when it becomes stale.
+
+=item B<auth>
+
+Accessor for the auth token, which is set after a successful B<_login>.
+
+=item B<token>
+
+Accessor for the user token, which is set by B<_token>.
 
 =back
 
